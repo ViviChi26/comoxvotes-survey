@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neighbour Survey — comoxvotes.ca</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f5f5f0;
+    color: #1a1a1a;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .survey-outer { max-width: 680px; margin: 0 auto; }
+
+  .survey-header { text-align: center; margin-bottom: 2rem; }
+
+  .logo-placeholder {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .logo-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #1D9E75;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-mark svg { width: 20px; height: 20px; fill: white; }
+
+  .logo-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1D9E75;
+    letter-spacing: -0.01em;
+  }
+
+  .survey-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 0.5px solid #e0e0d8;
+    padding: 2rem;
+  }
+
+  /* Intro screen */
+  .intro-screen { text-align: center; padding: 1rem 0; }
+  .intro-screen h2 { font-size: 26px; font-weight: 500; color: #1a1a1a; margin-bottom: 1rem; }
+  .intro-screen p { font-size: 15px; color: #555; line-height: 1.8; margin-bottom: 1rem; }
+  .intro-meta { display: flex; justify-content: center; gap: 1.5rem; margin: 1.5rem 0; flex-wrap: wrap; }
+  .intro-badge {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: #555;
+    background: #f5f5f0; padding: 6px 12px;
+    border-radius: 20px; border: 0.5px solid #e0e0d8;
+  }
+  .intro-badge i { color: #1D9E75; }
+  .intro-note { font-size: 13px; color: #888; font-style: italic; margin-top: 1rem; }
+
+  /* Progress */
+  .progress-bar { background: #f0f0ea; border-radius: 8px; height: 6px; margin-bottom: 1.5rem; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 8px; background: #1D9E75; transition: width 0.4s ease; }
+  .section-indicator { display: flex; gap: 8px; margin-bottom: 1.5rem; }
+  .sec-dot { width: 8px; height: 8px; border-radius: 50%; background: #f0f0ea; border: 0.5px solid #ddd; transition: all 0.2s; }
+  .sec-dot.done { background: #1D9E75; border-color: #1D9E75; }
+  .sec-dot.active { background: #9FE1CB; border-color: #1D9E75; }
+
+  .section-label { font-size: 11px; color: #999; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 4px; }
+  .section-title { font-size: 22px; font-weight: 500; color: #1a1a1a; margin-bottom: 6px; }
+  .section-desc { font-size: 15px; color: #666; line-height: 1.6; margin-bottom: 2rem; }
+
+  .q-block { margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 0.5px solid #f0f0ea; }
+  .q-block:last-of-type { border-bottom: none; }
+  .q-label { font-size: 15px; font-weight: 500; color: #1a1a1a; margin-bottom: 10px; line-height: 1.5; }
+  .q-sub { font-size: 13px; color: #888; margin-bottom: 10px; line-height: 1.5; }
+  .q-header { font-size: 16px; font-weight: 500; color: #1D9E75; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 0.5px solid #e0e0d8; }
+
+  .option-grid { display: flex; flex-direction: column; gap: 8px; }
+  .opt {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 14px; border: 0.5px solid #e0e0d8;
+    border-radius: 8px; cursor: pointer; background: #fff;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .opt:hover { border-color: #ccc; background: #f9f9f7; }
+  .opt.selected { border-color: #1D9E75; background: #E1F5EE; }
+  .opt input { margin-top: 3px; accent-color: #1D9E75; flex-shrink: 0; }
+  .opt-text { font-size: 14px; color: #1a1a1a; line-height: 1.5; }
+
+  .likert-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .lk-btn {
+    flex: 1; min-width: 36px; padding: 8px 4px; text-align: center;
+    font-size: 13px; border: 0.5px solid #e0e0d8; border-radius: 8px;
+    cursor: pointer; background: #fff; color: #1a1a1a;
+    transition: all 0.15s; font-family: inherit;
+  }
+  .lk-btn:hover { border-color: #bbb; background: #f9f9f7; }
+  .lk-btn.selected { border-color: #1D9E75; background: #1D9E75; color: #fff; }
+  .lk-labels { display: flex; justify-content: space-between; margin-top: 6px; }
+  .lk-label { font-size: 11px; color: #999; }
+
+  .rank-list { display: flex; flex-direction: column; gap: 6px; }
+  .rank-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border: 0.5px solid #e0e0d8;
+    border-radius: 8px; background: #fff; cursor: grab; user-select: none;
+    transition: border-color 0.15s;
+  }
+  .rank-item:active { cursor: grabbing; }
+  .rank-item.dragging { opacity: 0.45; border-color: #1D9E75; }
+  .rank-item.drag-over { border-color: #1D9E75; background: #E1F5EE; }
+  .rank-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #E1F5EE; color: #0F6E56;
+    font-size: 12px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .rank-text { font-size: 14px; color: #1a1a1a; line-height: 1.4; flex: 1; }
+  .rank-handle { color: #bbb; font-size: 16px; margin-left: auto; }
+
+  textarea {
+    width: 100%; padding: 10px 14px; font-size: 14px; font-family: inherit;
+    border: 0.5px solid #e0e0d8; border-radius: 8px; background: #fff;
+    color: #1a1a1a; resize: vertical; min-height: 90px; line-height: 1.6;
+    transition: border-color 0.15s;
+  }
+  textarea:focus { outline: none; border-color: #1D9E75; }
+
+  select, input[type="email"], input[type="text"] {
+    width: 100%; padding: 10px 14px; font-size: 14px; font-family: inherit;
+    border: 0.5px solid #e0e0d8; border-radius: 8px; background: #fff;
+    color: #1a1a1a; transition: border-color 0.15s;
+  }
+  select:focus, input[type="email"]:focus, input[type="text"]:focus { outline: none; border-color: #1D9E75; }
+
+  .input-mb { margin-bottom: 8px; display: block; }
+
+  .knowledge-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; margin-left: 8px;
+  }
+  .badge-correct { background: #EAF3DE; color: #3B6D11; }
+  .badge-wrong { background: #FCEBEB; color: #A32D2D; }
+
+  .signup-block {
+    padding: 1rem 1.25rem; border: 0.5px solid #1D9E75;
+    border-radius: 12px; background: #E1F5EE; margin-top: 12px;
+  }
+  .signup-block p { font-size: 14px; color: #0F6E56; margin-bottom: 10px; line-height: 1.5; font-weight: 500; }
+  .signup-block input { margin-bottom: 8px; }
+
+  .conditional-block {
+    margin-top: 12px; padding: 1rem 1.25rem;
+    border: 0.5px solid #e0e0d8; border-radius: 12px;
+    background: #f9f9f7;
+  }
+  .conditional-block .q-label { font-size: 14px; }
+
+  .nav-row { display: flex; align-items: center; justify-content: space-between; margin-top: 2rem; gap: 12px; }
+  .btn {
+    padding: 10px 24px; border-radius: 8px; border: 0.5px solid #ccc;
+    background: #fff; color: #1a1a1a; font-size: 14px; font-weight: 500;
+    cursor: pointer; font-family: inherit; transition: all 0.15s;
+  }
+  .btn:hover { background: #f5f5f0; }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn-primary { background: #1D9E75; border-color: #1D9E75; color: #fff; }
+  .btn-primary:hover { background: #0F6E56; border-color: #0F6E56; }
+  .btn-lg { padding: 14px 32px; font-size: 15px; border-radius: 10px; }
+  .nav-step { font-size: 13px; color: #999; }
+  .error-msg { font-size: 13px; color: #A32D2D; margin-top: 6px; }
+
+  /* Submitting state */
+  .submitting-overlay {
+    text-align: center; padding: 3rem 1rem;
+  }
+  .submitting-overlay p { font-size: 15px; color: #555; margin-top: 1rem; }
+  .spinner {
+    width: 36px; height: 36px; border: 3px solid #e0e0d8;
+    border-top-color: #1D9E75; border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Results */
+  .result-section { margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 0.5px solid #f0f0ea; }
+  .result-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .profile-pill { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; background: #E1F5EE; color: #0F6E56; margin-bottom: 10px; }
+  .score-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .score-label { font-size: 13px; color: #666; flex: 1; }
+  .score-bar-wrap { flex: 2; height: 8px; background: #f0f0ea; border-radius: 4px; overflow: hidden; }
+  .score-bar { height: 100%; border-radius: 4px; background: #1D9E75; }
+  .score-val { font-size: 13px; font-weight: 500; color: #1a1a1a; min-width: 36px; text-align: right; }
+  .corr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .corr-item { padding: 12px; border-radius: 8px; background: #f9f9f7; border: 0.5px solid #e8e8e0; }
+  .corr-title { font-size: 12px; color: #888; margin-bottom: 4px; }
+  .corr-val { font-size: 14px; font-weight: 500; color: #1a1a1a; line-height: 1.4; }
+  .closing-note { font-size: 15px; color: #555; line-height: 1.8; margin-bottom: 1rem; }
+  .run-highlight { padding: 1rem 1.25rem; background: #E1F5EE; border: 0.5px solid #1D9E75; border-radius: 8px; margin-bottom: 1rem; }
+  .run-highlight p:first-child { font-size: 14px; font-weight: 500; color: #0F6E56; margin-bottom: 4px; }
+  .run-highlight p:last-child { font-size: 13px; color: #0F6E56; line-height: 1.6; }
+  .result-links { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 1.5rem; }
+
+  @media (max-width: 520px) {
+    .survey-card { padding: 1.25rem; }
+    .corr-grid { grid-template-columns: 1fr; }
+    .intro-meta { gap: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="survey-outer">
+  <div class="survey-header">
+    <div class="logo-placeholder">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+        </svg>
+      </div>
+      <span class="logo-text">comoxvotes.ca</span>
+    </div>
+  </div>
+  <div class="survey-card" id="app"></div>
+</div>
+
+<script>
+// ─── Airtable config ───────────────────────────────────────────────
+const AIRTABLE_TOKEN = 'patldFEMC94D3iNVW.e984ea7bef224a6f508826e99844971a4f2080780be7d42cc3580208655cff67';
+const AIRTABLE_BASE  = 'appqc6VU5ZZbjLlRV';
+const AIRTABLE_TABLE = 'Responses';
+
+// ─── Static data ───────────────────────────────────────────────────
+const COUNCIL_QUALITIES = [
+  'Courage to act',
+  'Listens deeply',
+  'Committed to fiscal responsibility',
+  'Protects Comox\'s natural environment and heritage',
+  'Tackles housing needs with knowledge and fairness',
+  'Actively connects with and serves the whole community',
+  'Models respectful debate at the council table',
+  'Sees how each detail decision either upholds or undermines the OCP Vision & Guidelines'
+];
+
+const MAYOR_QUALITIES = [
+  ...COUNCIL_QUALITIES,
+  'Chairs meetings with fairness and authority',
+  'Builds consensus among council members',
+  'Takes clear public positions on difficult issues',
+  'Leads with vision for the long-term future of Comox'
+];
+
+const KNOWLEDGE_QS = [
+  { id: 'k1', q: 'Which document guides long-term land use planning in Town of Comox?', opts: ['Annual Budget', 'Official Community Plan (OCP)', 'Infrastructure Master Plan'], correct: 1 },
+  { id: 'k2', q: 'When was the Town of Comox Official Community Plan last updated?', opts: ['2022', '2024', 'January 2025', 'February 2026'], correct: 3 },
+  { id: 'k3', q: 'How many elected councillors sit on Comox Town Council (excluding the mayor)?', opts: ['4', '5', '6', '8'], correct: 2 },
+  { id: 'k4', q: 'The Comox Valley Regional District (CVRD) is separate from the Town of Comox.', opts: ['True — they are different bodies', 'False — they are the same body'], correct: 0 },
+  { id: 'k5', q: 'When is the next BC General Municipal Election for Comox?', opts: ['October 2025', 'October 17, 2026', 'Spring 2027', 'November 2026'], correct: 1 },
+];
+
+const NEIGHBOURHOODS = ['Buena Vista','Pritchard','Downtown','Hector-Aspen','Highland','Filberg','Foxwood','Radford','Manor','Other'];
+
+// ─── State ─────────────────────────────────────────────────────────
+const state = {
+  screen: 'intro', // intro | survey | submitting | results
+  section: 0,
+  answers: {},
+  errors: {},
+  councilRank: [...COUNCIL_QUALITIES],
+  mayorRank: [...MAYOR_QUALITIES],
+  knowledgeRevealed: {},
+};
+
+// ─── Helpers ───────────────────────────────────────────────────────
+const ga = id => state.answers[id];
+function sa(id, val) { state.answers[id] = val; state.errors[id] = false; render(); }
+
+function toggleCheck(id, val) {
+  const cur = state.answers[id] || [];
+  const next = cur.includes(val) ? cur.filter(v => v !== val) : [...cur, val];
+  sa(id, next);
+}
+
+function revealQ(id) { state.knowledgeRevealed[id] = true; render(); }
+
+function getCivicScore() { return KNOWLEDGE_QS.filter(q => state.answers[q.id] === q.correct).length; }
+function getEngagementScore() { return (state.answers['s4_engage'] || []).length; }
+function getEngagementProfile() {
+  const s = getEngagementScore();
+  if (s >= 5) return 'Comox Leader';
+  if (s >= 3) return 'Community Champion';
+  if (s >= 1) return 'Active Neighbour';
+  return 'Comox Neighbour';
+}
+function needsSignup() {
+  const c = state.answers['s4_engage'] || [];
+  return c.includes('volunteer') || c.includes('drive') || c.includes('run');
+}
+function wantsMeetGreet() {
+  return state.answers['s4_meetgreet'] === 0 || state.answers['s4_meetgreet'] === 1;
+}
+
+// ─── Validation ────────────────────────────────────────────────────
+function validate(section) {
+  const e = {};
+  if (section === 0) {
+    ['s1_missing','s1_values'].forEach(id => { if (!ga(id)) e[id] = 'Please share your thoughts'; });
+    ['s1_rate_a','s1_rate_b','s1_rate_c'].forEach(id => { if (ga(id) === undefined) e[id] = 'Please select a rating'; });
+  }
+  if (section === 1) {
+    KNOWLEDGE_QS.forEach(q => { if (ga(q.id) === undefined) e[q.id] = 'Please select an answer'; });
+    if (ga('s2_familiar') === undefined) e['s2_familiar'] = 'Please select a rating';
+  }
+  if (section === 2) {
+    if (!ga('s3_neighbourhood')) e['s3_neighbourhood'] = 'Please select your neighbourhood';
+    ['s3_priorities','s3_best','s3_improve','s3_stopstart'].forEach(id => { if (!ga(id)) e[id] = 'Please share your thoughts'; });
+    if (ga('s3_ocp_participated') === undefined) e['s3_ocp_participated'] = 'Please select an answer';
+    if (ga('s3_height') === undefined) e['s3_height'] = 'Please select an answer';
+    if (ga('s3_storeys') === undefined) e['s3_storeys'] = 'Please select an answer';
+    if (ga('s3_ocp_amend') === undefined) e['s3_ocp_amend'] = 'Please select an answer';
+  }
+  if (section === 3) {
+    if (ga('s4_vote') === undefined) e['s4_vote'] = 'Please select a rating';
+    if (ga('s4_knowscandidate') === undefined) e['s4_knowscandidate'] = 'Please select an answer';
+  }
+  state.errors = e;
+  return Object.keys(e).length === 0;
+}
+
+// ─── Navigation ────────────────────────────────────────────────────
+function startSurvey() { state.screen = 'survey'; render(); }
+
+function nextSection() {
+  if (!validate(state.section)) { render(); window.scrollTo(0,0); return; }
+  if (state.section < 3) { state.section++; render(); window.scrollTo(0,0); }
+  else { submitSurvey(); }
+}
+
+function prevSection() {
+  if (state.section > 0) { state.section--; render(); window.scrollTo(0,0); }
+}
+
+// ─── Airtable submission ───────────────────────────────────────────
+async function submitSurvey() {
+  state.screen = 'submitting';
+  render();
+
+  const a = state.answers;
+  const fields = {
+    'Response ID': 'R-' + Date.now(),
+    // Section 1
+    'Council Rank 1': state.councilRank[0] || '',
+    'Council Rank 2': state.councilRank[1] || '',
+    'Council Rank 3': state.councilRank[2] || '',
+    'Council Full Ranking': state.councilRank.join(' > '),
+    'Mayor Rank 1': state.mayorRank[0] || '',
+    'Mayor Rank 2': state.mayorRank[1] || '',
+    'Mayor Rank 3': state.mayorRank[2] || '',
+    'Mayor Full Ranking': state.mayorRank.join(' > '),
+    'Mayor Open Text': a['s1_mayor'] || '',
+    'Missing Quality': a['s1_missing'] || '',
+    'Council Values': a['s1_values'] || '',
+    'Candidate Position Change (1-5)': (a['s1_rate_a'] || 0) + 1,
+    'Candidate Attends Meetings (1-5)': (a['s1_rate_b'] || 0) + 1,
+    'Candidate Accessible (1-5)': (a['s1_rate_c'] || 0) + 1,
+    // Section 2
+    'K1 OCP Question': a['k1'] === 1 ? 'Correct' : 'Incorrect',
+    'K2 OCP Date': a['k2'] === 3 ? 'Correct' : 'Incorrect',
+    'K3 Councillor Count': a['k3'] === 2 ? 'Correct' : 'Incorrect',
+    'K4 CVRD': a['k4'] === 0 ? 'Correct' : 'Incorrect',
+    'K5 Election Date': a['k5'] === 1 ? 'Correct' : 'Incorrect',
+    'Civic Knowledge Score': getCivicScore(),
+    'Self Assessed Familiarity (1-5)': (a['s2_familiar'] || 0) + 1,
+    // Section 3
+    'Neighbourhood': a['s3_neighbourhood'] === 'Other' ? 'Other - ' + (a['s3_neighbourhood_other'] || 'not specified') : (a['s3_neighbourhood'] || ''),
+    'Top 3 Priorities': a['s3_priorities'] || '',
+    'Best Change Last 4 Years': a['s3_best'] || '',
+    'Improve Next 4 Years': a['s3_improve'] || '',
+    'Stop Start Keep': a['s3_stopstart'] || '',
+    'OCP Participation': ['Yes - participated','Aware - did not participate','Was not aware'][a['s3_ocp_participated']] || '',
+    'OCP How Participated': (a['s3_ocp_how'] || []).join(', '),
+    'OCP Non Participation Reason': ['Not enough time','Did not feel input would matter','Did not know enough about OCP','Other'][a['s3_ocp_why']] || '',
+    'OCP Height Change Position': ['Supports','Does not support','Was unaware','Needs more info'][a['s3_height']] || '',
+    '6 Storeys Across Neighbourhoods': ['Yes anywhere','Downtown core only','Specific designated areas only','Prefers 4 storeys or less','Needs more info'][a['s3_storeys']] || '',
+    'OCP Amendment Timing': ['Not for 12 months','Not for 2 years','Only at 5-year review','Anytime','Not sure'][a['s3_ocp_amend']] || '',
+    // Section 4
+    'Vote Intention (1-5)': (a['s4_vote'] || 0) + 1,
+    'Voting Barrier': ['Not enough time','Does not know candidates','No trusted candidate','Has not thought about it','Other'][a['s4_barrier']] || '',
+    'Engagement Actions': (a['s4_engage'] || []).join(', '),
+    'Engagement Score': getEngagementScore(),
+    'Engagement Profile': getEngagementProfile(),
+    'Volunteer Name': a['s4_name'] || '',
+    'Volunteer Email': a['s4_signup_email'] || '',
+    'Knows Candidate': ['Yes','Maybe','No'][a['s4_knowscandidate']] || '',
+    'Meet and Greet Interest': ['Yes - keep informed','Yes - more info first','Not right now'][a['s4_meetgreet']] || '',
+    'Meet and Greet Name': a['s4_mg_name'] || '',
+    'Meet and Greet Email': a['s4_mg_email'] || '',
+    'Newsletter Email': a['s4_newsletter'] || '',
+    'Submitted At': new Date().toISOString(),
+  };
+
+  try {
+    const resp = await fetch('https://formspree.io/f/mykazpgv', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(fields)
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json();
+      console.error('Formspree error:', err);
+    } else {
+      console.log('Formspree submission successful');
+    }
+  } catch (err) {
+    console.error('Submission error:', err);
+    // Still show results even if submission fails
+  }
+
+  state.screen = 'results';
+  render();
+  window.scrollTo(0,0);
+}
+
+// ─── Render helpers ────────────────────────────────────────────────
+function renderLikert(id, count, labelLeft, labelRight) {
+  const cur = ga(id);
+  let html = '<div class="likert-row">';
+  for (let i = 0; i < count; i++) {
+    html += `<button class="lk-btn${cur === i ? ' selected' : ''}" onclick="sa('${id}',${i})">${i+1}</button>`;
+  }
+  html += '</div>';
+  if (labelLeft) html += `<div class="lk-labels"><span class="lk-label">${labelLeft}</span><span class="lk-label">${labelRight}</span></div>`;
+  return html;
+}
+
+function renderRadio(name, opts, answerId) {
+  return opts.map((opt, i) => {
+    const sel = ga(answerId) === i;
+    return `<label class="opt${sel?' selected':''}"><input type="radio" name="${name}" value="${i}" ${sel?'checked':''} onchange="sa('${answerId}',${i})"><span class="opt-text">${opt}</span></label>`;
+  }).join('');
+}
+
+function renderRankList(id, items) {
+  return `<div class="rank-list" id="${id}">
+    ${items.map((item,i) => `
+      <div class="rank-item" data-list="${id}" data-val="${item}">
+        <div class="rank-num">${i+1}</div>
+        <span class="rank-text">${item}</span>
+        <i class="ti ti-grip-horizontal rank-handle" aria-hidden="true"></i>
+      </div>`).join('')}
+  </div>`;
+}
+
+// ─── Section renderers ─────────────────────────────────────────────
+function renderSection0() {
+  return `
+  <div class="q-block">
+    <p class="q-label">For Comox Council — drag to rank these eight qualities, most important at the top.</p>
+    <p class="q-sub">Your top choice shapes your leadership profile.</p>
+    ${renderRankList('rank-council', state.councilRank)}
+  </div>
+  <div class="q-block">
+    <p class="q-label">For the Mayor of Comox — drag to rank these twelve qualities, most important at the top.</p>
+    <p class="q-sub">The mayor role includes additional responsibilities — rank accordingly.</p>
+    ${renderRankList('rank-mayor', state.mayorRank)}
+  </div>
+  <div class="q-block">
+    <p class="q-label">In your words: what does Comox most need from its next Mayor?</p>
+    <textarea placeholder="Share your thoughts…" onchange="sa('s1_mayor',this.value)">${ga('s1_mayor')||''}</textarea>
+  </div>
+  <div class="q-block">
+    <p class="q-label">In your words: what one quality has been missing from Comox council?</p>
+    <textarea placeholder="Share your thoughts…" onchange="sa('s1_missing',this.value)">${ga('s1_missing')||''}</textarea>
+    ${state.errors['s1_missing']?`<p class="error-msg">${state.errors['s1_missing']}</p>`:''}
+  </div>
+  <div class="q-block">
+    <p class="q-label">Describe the most important values you want to see next at the Comox Council table?</p>
+    <textarea placeholder="Share your thoughts…" onchange="sa('s1_values',this.value)">${ga('s1_values')||''}</textarea>
+    ${state.errors['s1_values']?`<p class="error-msg">${state.errors['s1_values']}</p>`:''}
+  </div>
+  <div class="q-block">
+    <p class="q-header">When you vote on October 17, 2026:</p>
+    <div style="display:flex;flex-direction:column;gap:1.5rem">
+      <div>
+        <p class="q-label">How important is it that your candidate is willing to change their position when presented with new evidence or community input?</p>
+        ${renderLikert('s1_rate_a',5,'Not important','Very important')}
+        ${state.errors['s1_rate_a']?`<p class="error-msg">${state.errors['s1_rate_a']}</p>`:''}
+      </div>
+      <div>
+        <p class="q-label">How important is it that your candidate attends and listens at neighbourhood meetings before making decisions?</p>
+        ${renderLikert('s1_rate_b',5,'Not important','Very important')}
+        ${state.errors['s1_rate_b']?`<p class="error-msg">${state.errors['s1_rate_b']}</p>`:''}
+      </div>
+      <div>
+        <p class="q-label">How important is it that your candidate is accessible and responsive to residents outside of formal meetings?</p>
+        ${renderLikert('s1_rate_c',5,'Not important','Very important')}
+        ${state.errors['s1_rate_c']?`<p class="error-msg">${state.errors['s1_rate_c']}</p>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSection1() {
+  let html = KNOWLEDGE_QS.map(q => `
+    <div class="q-block">
+      <p class="q-label">${q.q}</p>
+      <div class="option-grid">
+        ${q.opts.map((opt,i) => {
+          const sel = state.answers[q.id] === i;
+          const rev = state.knowledgeRevealed[q.id];
+          let badge = '';
+          if (rev && sel && i === q.correct) badge = `<span class="knowledge-badge badge-correct"><i class="ti ti-check"></i> Correct</span>`;
+          else if (rev && sel && i !== q.correct) badge = `<span class="knowledge-badge badge-wrong"><i class="ti ti-x"></i> Not quite</span>`;
+          return `<label class="opt${sel?' selected':''}"><input type="radio" name="${q.id}" value="${i}" ${sel?'checked':''} onchange="sa('${q.id}',${i});revealQ('${q.id}')"><span class="opt-text">${opt}${badge}</span></label>`;
+        }).join('')}
+      </div>
+      ${state.errors[q.id]?`<p class="error-msg">${state.errors[q.id]}</p>`:''}
+    </div>`).join('');
+
+  html += `
+    <div class="q-block">
+      <p class="q-label">How familiar do you feel with recent Town of Comox council decisions?</p>
+      ${renderLikert('s2_familiar',5,'Not at all familiar','Very familiar')}
+      ${state.errors['s2_familiar']?`<p class="error-msg">${state.errors['s2_familiar']}</p>`:''}
+    </div>`;
+  return html;
+}
+
+function renderSection2() {
+  const participated = ga('s3_ocp_participated');
+  return `
+  <div class="q-block">
+    <p class="q-label">Which Comox neighbourhood do you live in?</p>
+    <select onchange="sa('s3_neighbourhood',this.value)">
+      <option value="">— Select your neighbourhood —</option>
+      ${NEIGHBOURHOODS.map(n=>`<option value="${n}" ${ga('s3_neighbourhood')===n?'selected':''}>${n}</option>`).join('')}
+    </select>
+    ${state.errors['s3_neighbourhood']?`<p class="error-msg">${state.errors['s3_neighbourhood']}</p>`:''}
+    ${ga('s3_neighbourhood')==='Other'?`
+    <div style="margin-top:10px">
+      <p class="q-label" style="font-size:14px">Please tell us where you live in Comox:</p>
+      <input type="text" placeholder="Your area or street…" value="${ga('s3_neighbourhood_other')||''}" onchange="sa('s3_neighbourhood_other',this.value)" style="margin-top:6px">
+    </div>`:''}
+  </div>
+  <div class="q-block">
+    <p class="q-label">What are the 3 issues you most want the next Comox council to prioritize? Think about your neighbourhood, your daily life, and the kind of Comox you want in 10 years.</p>
+    <textarea placeholder="List your top 3 priorities…" onchange="sa('s3_priorities',this.value)">${ga('s3_priorities')||''}</textarea>
+    ${state.errors['s3_priorities']?`<p class="error-msg">${state.errors['s3_priorities']}</p>`:''}
+  </div>
+  <div class="q-block">
+    <p class="q-label">What has been the best change to Comox in the last four years?</p>
+    <textarea placeholder="Share your thoughts…" onchange="sa('s3_best',this.value)">${ga('s3_best')||''}</textarea>
+    ${state.errors['s3_best']?`<p class="error-msg">${state.errors['s3_best']}</p>`:''}
+  </div>
+  <div class="q-block">
+    <p class="q-label">What is one area that could be improved in the next four years?</p>
+    <textarea placeholder="Share your thoughts…" onchange="sa('s3_improve',this.value)">${ga('s3_improve')||''}</textarea>
+    ${state.errors['s3_improve']?`<p class="error-msg">${state.errors['s3_improve']}</p>`:''}
+  </div>
+  <div class="q-block">
+    <p class="q-label">Stop / Start / Keep — what would you like next council to stop doing, start doing, and keep doing?</p>
+    <textarea placeholder="E.g. Stop: approving tall buildings near the marina. Start: holding open neighbourhood meetings. Keep: maintaining park spaces…" onchange="sa('s3_stopstart',this.value)">${ga('s3_stopstart')||''}</textarea>
+    ${state.errors['s3_stopstart']?`<p class="error-msg">${state.errors['s3_stopstart']}</p>`:''}
+  </div>
+  <div class="q-block">
+    <p class="q-label">Did you participate in the Town of Comox OCP update process over the past 18 months?</p>
+    <div class="option-grid">
+      ${renderRadio('s3_ocp_participated',['Yes — I participated','No — I was aware but chose not to participate','No — I wasn\'t aware it was happening'],'s3_ocp_participated')}
+    </div>
+    ${state.errors['s3_ocp_participated']?`<p class="error-msg">${state.errors['s3_ocp_participated']}</p>`:''}
+    ${participated === 0 ? `
+    <div class="conditional-block">
+      <p class="q-label">How did you participate? Select all that apply.</p>
+      <div class="option-grid">
+        ${[['survey','Filled out the Town of Comox online survey'],['openhouse','Attended an open house'],['letter','Wrote a letter or email to council'],['hearing','Attended a public hearing'],['spoke','Spoke at a public hearing'],['other','Other']].map(([val,label])=>`
+          <label class="opt${(ga('s3_ocp_how')||[]).includes(val)?' selected':''}">
+            <input type="checkbox" value="${val}" ${(ga('s3_ocp_how')||[]).includes(val)?'checked':''} onchange="toggleCheck('s3_ocp_how','${val}')">
+            <span class="opt-text">${label}</span>
+          </label>`).join('')}
+      </div>
+    </div>` : ''}
+    ${participated === 1 ? `
+    <div class="conditional-block">
+      <p class="q-label">What was the main reason you didn't participate?</p>
+      <div class="option-grid">
+        ${renderRadio('s3_ocp_why',['Not enough time','Didn\'t feel my input would make a difference','Didn\'t know enough about the OCP to contribute','Other'],'s3_ocp_why')}
+      </div>
+    </div>` : ''}
+  </div>
+  <div class="q-block">
+    <p class="q-label">The newly adopted Comox Official Community Plan now includes a change from a 4 storey to 6 storey town baseline building height. Do you feel this reflects the kind of height that's right for Comox?</p>
+    <div class="option-grid">
+      ${renderRadio('s3_height',['Yes, I support this direction','No, I do not support this direction','I wasn\'t aware of this change in the new OCP','I need more information before deciding'],'s3_height')}
+    </div>
+    ${state.errors['s3_height']?`<p class="error-msg">${state.errors['s3_height']}</p>`:''}
+  </div>
+  <div class="q-block">
+    <p class="q-label">Do you feel 6 storeys is appropriate across all Comox neighbourhoods — not just downtown?</p>
+    <div class="option-grid">
+      ${renderRadio('s3_storeys',['Yes — anywhere in Comox','Downtown core only','Only in specific designated areas','No — I prefer 4 storeys or less','I need more information'],'s3_storeys')}
+    </div>
+    ${state.errors['s3_storeys']?`<p class="error-msg">${state.errors['s3_storeys']}</p>`:''}
+  </div>
+  <div class="q-block">
+    <p class="q-label">The new Comox OCP was adopted in February 2026. How soon do you feel council should be able to consider amendments or changes to it?</p>
+    <div class="option-grid">
+      ${renderRadio('s3_ocp_amend',['Not for at least 12 months','Not for at least 2 years','Only at the mandatory 5-year review','Council should be able to amend at any time','I\'m not sure'],'s3_ocp_amend')}
+    </div>
+    ${state.errors['s3_ocp_amend']?`<p class="error-msg">${state.errors['s3_ocp_amend']}</p>`:''}
+  </div>`;
+}
+
+function renderSection3() {
+  const checks = state.answers['s4_engage'] || [];
+  const lowIntent = ga('s4_vote') !== undefined && ga('s4_vote') < 2;
+  const knowsCandidate = ga('s4_knowscandidate');
+
+  return `
+  <div class="q-block">
+    <p class="q-label">How likely are you to vote on October 17, 2026 for a new Comox Mayor & Council?</p>
+    ${renderLikert('s4_vote',5,'Unlikely','Definitely voting')}
+    ${state.errors['s4_vote']?`<p class="error-msg">${state.errors['s4_vote']}</p>`:''}
+  </div>
+  ${lowIntent?`
+  <div class="q-block">
+    <div class="option-grid">
+      ${renderRadio('s4_barrier',['Not enough time','Don\'t know enough about candidates','No candidate I fully trust','Haven\'t thought about it yet','Other'],'s4_barrier')}
+    </div>
+  </div>`:''}
+  <div class="q-block">
+    <p class="q-label">Select every action you're willing to take before October 17, 2026.</p>
+    <div class="option-grid">
+      ${[['vote','I will vote'],['drive','I will drive or escort someone to vote'],['volunteer','I will volunteer on a campaign'],['forum','I will attend a candidate forum'],['candidates','I will help find or encourage candidates to run'],['share','I will share information with my neighbours'],['run','I would consider running for council myself']].map(([val,label])=>`
+        <label class="opt${checks.includes(val)?' selected':''}">
+          <input type="checkbox" value="${val}" ${checks.includes(val)?'checked':''} onchange="toggleCheck('s4_engage','${val}')">
+          <span class="opt-text">${label}</span>
+        </label>`).join('')}
+    </div>
+    ${needsSignup()?`
+    <div class="signup-block">
+      <p>You're ready to make a difference — leave your name and email and the comoxvotes.ca team will connect with you about next steps.</p>
+      <input type="text" class="input-mb" placeholder="Your name" value="${ga('s4_name')||''}" onchange="sa('s4_name',this.value)">
+      <input type="email" placeholder="Your email" value="${ga('s4_signup_email')||''}" onchange="sa('s4_signup_email',this.value)">
+    </div>`:''}
+  </div>
+  <div class="q-block">
+    <p class="q-label">Based on the qualities and values you've described, do you know someone in your network or neighbourhood who reflects these qualities and might make a great candidate for Comox Council or Mayor?</p>
+    <div class="option-grid">
+      ${renderRadio('s4_knowscandidate',['Yes — I know someone','Maybe — someone comes to mind','No — not at the moment'],'s4_knowscandidate')}
+    </div>
+    ${state.errors['s4_knowscandidate']?`<p class="error-msg">${state.errors['s4_knowscandidate']}</p>`:''}
+    ${knowsCandidate === 0 || knowsCandidate === 1 ? `
+    <div class="conditional-block">
+      <p class="q-label">Would you and your nominee be interested in attending a casual meet and greet — a chance to ask questions, learn more, and explore what getting involved looks like?</p>
+      <div class="option-grid">
+        ${renderRadio('s4_meetgreet',['Yes — please keep me informed about upcoming meet and greets','Yes — but I\'d like more information first','Not right now'],'s4_meetgreet')}
+      </div>
+      ${wantsMeetGreet()?`
+      <div class="signup-block" style="margin-top:12px">
+        <p>Leave your name and email and we'll be in touch with details.</p>
+        <input type="text" class="input-mb" placeholder="Your name" value="${ga('s4_mg_name')||''}" onchange="sa('s4_mg_name',this.value)">
+        <input type="email" placeholder="Your email" value="${ga('s4_mg_email')||''}" onchange="sa('s4_mg_email',this.value)">
+      </div>`:''}
+    </div>`:''}
+  </div>
+  <div class="q-block">
+    <p class="q-label">New sign-up for the 2026 election period — leave your email to receive 'For the Love of Comox' updates from comoxvotes.ca</p>
+    <input type="email" placeholder="your@email.com" value="${ga('s4_newsletter')||''}" onchange="sa('s4_newsletter',this.value)">
+  </div>`;
+}
+
+// ─── Screen renderers ──────────────────────────────────────────────
+function renderIntro() {
+  return `
+  <div class="intro-screen">
+    <h2>Welcome, neighbour.</h2>
+    <p>Thank you for taking a few minutes to share your views. We're asking Comox residents, workers, and voters to help us understand what qualities and values matter most in your next Mayor and Council — and how engaged you want to be in making it happen.</p>
+    <p>Your responses help define the kind of leadership Comox deserves on <strong>October 17, 2026</strong>.</p>
+    <div class="intro-meta">
+      <span class="intro-badge"><i class="ti ti-clock"></i> 6–8 minutes</span>
+      <span class="intro-badge"><i class="ti ti-shield-check"></i> Completely anonymous</span>
+      <span class="intro-badge"><i class="ti ti-map-pin"></i> Comox residents, workers & voters only</span>
+    </div>
+    <button class="btn btn-primary btn-lg" onclick="startSurvey()">Start the survey →</button>
+    <p class="intro-note">No personal information is collected unless you choose to share it at the end.</p>
+  </div>`;
+}
+
+function renderSubmitting() {
+  return `
+  <div class="submitting-overlay">
+    <div class="spinner"></div>
+    <p>Submitting your responses…</p>
+  </div>`;
+}
+
+function renderResults() {
+  const civic = getCivicScore();
+  const engagement = getEngagementScore();
+  const voteIntent = (ga('s4_vote') || 0) + 1;
+  const selfFamiliar = (ga('s2_familiar') || 0) + 1;
+  const topCouncil = state.councilRank[0];
+  const topMayor = state.mayorRank[0];
+  const profile = getEngagementProfile();
+  const civicGap = selfFamiliar - Math.round((civic / 5) * 5);
+  const hasRun = (state.answers['s4_engage'] || []).includes('run');
+  const heightLabels = ['Supports this direction','Does not support','Was unaware of this change','Needs more information'];
+
+  const profileDescs = {
+    'Comox Leader': 'You\'re ready to lead the change — consider helping find candidates or getting more involved.',
+    'Community Champion': 'You\'re a multiplier — your network and actions will bring others along.',
+    'Active Neighbour': 'You\'re showing up where it counts. One more step: bring a neighbour.',
+    'Comox Neighbour': 'Every journey starts somewhere. Your vote on Oct 17 matters enormously.'
+  };
+
+  return `
+  <div class="result-section">
+    <p class="section-label">Your results</p>
+    <p class="section-title" style="margin-bottom:0.75rem">Thank you, neighbour <i class="ti ti-heart" style="color:#1D9E75"></i></p>
+    <span class="profile-pill">${profile}</span>
+    <p style="font-size:14px;color:#555;line-height:1.6">${profileDescs[profile]}</p>
+  </div>
+  <div class="result-section">
+    <p style="font-size:13px;font-weight:500;margin-bottom:12px">Your snapshot</p>
+    ${[['Civic knowledge',civic,5],['Self-assessed familiarity',selfFamiliar-1,4],['Vote intention',voteIntent-1,4],['Engagement actions',engagement,7]].map(([label,val,max])=>`
+      <div class="score-row">
+        <span class="score-label">${label}</span>
+        <div class="score-bar-wrap"><div class="score-bar" style="width:${Math.round(val/max*100)}%"></div></div>
+        <span class="score-val">${val}/${max}</span>
+      </div>`).join('')}
+  </div>
+  <div class="result-section">
+    <p style="font-size:13px;font-weight:500;margin-bottom:12px">Your profile at a glance</p>
+    <div class="corr-grid">
+      <div class="corr-item"><p class="corr-title">Top council quality</p><p class="corr-val">${topCouncil}</p></div>
+      <div class="corr-item"><p class="corr-title">Top mayoral quality</p><p class="corr-val">${topMayor}</p></div>
+      <div class="corr-item"><p class="corr-title">Neighbourhood</p><p class="corr-val">${ga('s3_neighbourhood')||'Not specified'}</p></div>
+      <div class="corr-item"><p class="corr-title">Knowledge vs confidence</p><p class="corr-val" style="color:${Math.abs(civicGap)>1?'#A32D2D':'#0F6E56'}">${civicGap>1?'Confidence exceeds knowledge':civicGap<-1?'More informed than you think':'Well-calibrated'}</p></div>
+      <div class="corr-item"><p class="corr-title">OCP height change</p><p class="corr-val">${ga('s3_height')!==undefined?heightLabels[ga('s3_height')]:'—'}</p></div>
+      <div class="corr-item"><p class="corr-title">OCP participation</p><p class="corr-val">${['Participated','Was aware','Was not aware'][ga('s3_ocp_participated')]||'—'}</p></div>
+    </div>
+  </div>
+  ${hasRun?`
+  <div class="run-highlight">
+    <p><i class="ti ti-star"></i> You said you'd consider running!</p>
+    <p>That's exactly the kind of neighbour Comox needs. The comoxvotes.ca team will be in touch.</p>
+  </div>`:''}
+  <div class="result-section">
+    <p class="closing-note">Your voice matters. By sharing your views today you are helping shape the kind of leadership and community Comox deserves on October 17, 2026.</p>
+    <p class="closing-note">Together, we are neighbours committed to neighbourhood focused, traffic appropriate, context sensitive growth — and to electing a council that reflects these values.</p>
+    <p style="font-size:14px;color:#888">— The comoxvotes.ca team</p>
+  </div>
+  <div class="result-links">
+    <a href="https://www.comoxvotes.ca" class="btn btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-home"></i> comoxvotes.ca</a>
+  </div>`;
+}
+
+// ─── Main render ───────────────────────────────────────────────────
+function render() {
+  const app = document.getElementById('app');
+
+  if (state.screen === 'intro') { app.innerHTML = renderIntro(); return; }
+  if (state.screen === 'submitting') { app.innerHTML = renderSubmitting(); return; }
+  if (state.screen === 'results') { app.innerHTML = renderResults(); return; }
+
+  const SECTIONS = [
+    { title: 'Leadership qualities', label: 'Section 1 of 4', desc: 'Help us understand what Comox neighbours most value in their next council members and Mayor.' },
+    { title: 'Your council knowledge', label: 'Section 2 of 4', desc: "A quick check on what's on your radar — no pressure, this helps us understand where neighbours are starting from." },
+    { title: 'Priorities for next council', label: 'Section 3 of 4', desc: 'Tell us what matters most in your neighbourhood and what you want the next council to act on.' },
+    { title: 'Your level of engagement', label: 'Section 4 of 4', desc: 'How do you see yourself showing up between now and October 17, 2026?' },
+  ];
+
+  const sec = SECTIONS[state.section];
+  const progress = (state.section / SECTIONS.length) * 100;
+  const dots = SECTIONS.map((_,i) => `<div class="sec-dot${i<state.section?' done':i===state.section?' active':''}"></div>`).join('');
+
+  let body = '';
+  if (state.section === 0) body = renderSection0();
+  else if (state.section === 1) body = renderSection1();
+  else if (state.section === 2) body = renderSection2();
+  else body = renderSection3();
+
+  app.innerHTML = `
+    <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+    <div class="section-indicator">${dots}</div>
+    <p class="section-label">${sec.label}</p>
+    <p class="section-title">${sec.title}</p>
+    <p class="section-desc">${sec.desc}</p>
+    ${body}
+    <div class="nav-row">
+      <button class="btn" onclick="prevSection()" ${state.section===0?'disabled':''}>← Back</button>
+      <span class="nav-step">${state.section+1} of 4</span>
+      <button class="btn btn-primary" onclick="nextSection()">${state.section===3?'Submit survey →':'Next →'}</button>
+    </div>`;
+
+  initDrag();
+}
+
+// ─── Drag and drop ─────────────────────────────────────────────────
+function initDrag() {
+  ['rank-council','rank-mayor'].forEach(listId => {
+    const list = document.getElementById(listId);
+    if (!list) return;
+    let dragging = null;
+    list.querySelectorAll('.rank-item').forEach(item => {
+      item.draggable = true;
+      item.addEventListener('dragstart', () => { dragging = item; setTimeout(() => item.classList.add('dragging'), 0); });
+      item.addEventListener('dragend', () => { item.classList.remove('dragging'); dragging = null; updateRankFromDOM(listId); });
+      item.addEventListener('dragover', e => { e.preventDefault(); item.classList.add('drag-over'); });
+      item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+      item.addEventListener('drop', e => {
+        e.preventDefault(); item.classList.remove('drag-over');
+        if (dragging && dragging !== item) {
+          const nodes = Array.from(list.children);
+          const di = nodes.indexOf(dragging), oi = nodes.indexOf(item);
+          if (di < oi) list.insertBefore(dragging, item.nextSibling);
+          else list.insertBefore(dragging, item);
+          updateRankFromDOM(listId);
+        }
+      });
+    });
+  });
+}
+
+function updateRankFromDOM(listId) {
+  const list = document.getElementById(listId);
+  if (!list) return;
+  const newOrder = Array.from(list.querySelectorAll('.rank-item')).map(el => el.dataset.val);
+  if (listId === 'rank-council') state.councilRank = newOrder;
+  else state.mayorRank = newOrder;
+  // Update rank numbers without full re-render
+  list.querySelectorAll('.rank-item').forEach((el, i) => {
+    el.querySelector('.rank-num').textContent = i + 1;
+  });
+}
+
+render();
+</script>
+</body>
+</html>
