@@ -5,7 +5,7 @@ exports.handler = async function(event, context) {
 
   const AIRTABLE_TOKEN = 'patldFEMC94D3iNVW.e984ea7bef224a6f508826e99844971a4f2080780be7d42cc3580208655cff67';
   const AIRTABLE_BASE = 'appqc6VU5ZZbjLlRV';
-  const AIRTABLE_TABLE = 'Responses';
+  const AIRTABLE_TABLE = 'tblSZ1hAGpXWq545G';
 
   try {
     const fields = JSON.parse(event.body);
