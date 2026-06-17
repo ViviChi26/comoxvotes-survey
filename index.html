@@ -451,12 +451,12 @@ function renderSection4(){
     <div class="option-grid">${renderRadio('s5_traffic',['Yes — our roads and transit can handle projected growth','No — our infrastructure cannot support this level of growth','I wasn\'t aware of the new 20-year growth forecast','I need more information before deciding'],'s5_traffic')}</div>
   </div>
   <div class="q-block">
-    <p class="q-label">When significant community opposition is expressed through letters, delegations and public hearings, on a scale of 1 to 10 how much should that opposition influence council's decisions on major planning and zoning matters?</p>
-    ${renderScale('s5_opposition',10,'Not at all — council is elected to decide','Completely — council must follow community direction')}
+    <p class="q-label">On a scale of 1 to 10, how well does current Town of Comox council decision-making serve the interests of the whole community?</p>
+    ${renderScale('s5_trust',10,'Poorly','Very well')}
   </div>
   <div class="q-block">
-    <p class="q-label">On a scale of 1 to 10, how much do you trust current Town of Comox decision-making processes to reflect the genuine interests of the whole community?</p>
-    ${renderScale('s5_trust',10,'Not at all','Completely')}
+    <p class="q-label">When significant community opposition is expressed through letters, delegations and public hearings, on a scale of 1 to 10 how much should that opposition influence council's decisions on major planning and zoning matters?</p>
+    ${renderScale('s5_opposition',10,'Not at all — council is elected to decide','Completely — council must follow community direction')}
   </div>
   <div class="q-block">
     <p class="q-label">What would most strengthen your confidence in local government decision-making?</p>
@@ -575,7 +575,7 @@ function renderResults(){
   ${hasRun?`<div class="run-highlight"><p><i class="ti ti-star"></i> You said you'd consider running!</p><p>That's exactly the kind of neighbour Comox needs. The comoxvotes.ca team will be in touch.</p></div>`:''}
   <div class="result-section">
     <p class="closing-note">Your voice matters. By sharing your views today you are helping shape the kind of leadership and community Comox deserves on October 17, 2026.</p>
-    <p class="closing-note">Together, we are neighbours committed to neighbourhood focused, traffic appropriate, context sensitive growth — to stewarding our natural environment, honouring our heritage, and safeguarding what makes Comox worth fighting for.</p>
+    <p class="closing-note">Together, we are neighbours committed to neighbourhood focused, traffic appropriate, context sensitive growth — to stewarding our natural environment, honouring our heritage, and safeguarding what makes Comox, Comox.</p>
     <p style="font-size:15px;color:#888">— The comoxvotes.ca team</p>
   </div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:1.5rem">
