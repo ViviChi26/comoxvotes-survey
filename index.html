@@ -223,7 +223,7 @@ async function submitSurvey(){
     'Top 3 voting qualities':(a['s2_top3']||[]).join(', '),
     'Priority A1':rateStr('s3a1',S2A1_ITEMS),
     'Priority A2':rateStr('s3a2',S2A2_ITEMS),
-    'Priority A comment':a['s3a_comment']||'',
+    'Housing approach':['Provincial targets','Missing middle','Specific types','OCP aligned','Balanced mix','Needs more info'][a['s3_housing']]||'',
     'Priority B':rateStr('s3b',S2B_ITEMS),
     'K1':a['k1']===1?'Correct':'Incorrect',
     'K2':a['k2']===3?'Correct':'Incorrect',
@@ -370,10 +370,10 @@ function renderSection2(){
     <p class="q-header">Community and economy — how important is each as a priority for next council?</p>
     <p class="q-sub">Rate each 1 (Not a priority) to 5 (Top priority)</p>
     ${S2A2_ITEMS.map((item,i)=>`<div class="rating-item" style="margin-bottom:1rem"><p class="rating-label">${item}</p>${renderLikert(`s3a2_${i}`,5,'Not a priority','Top priority')}</div>`).join('')}
-    <div style="margin-top:1.5rem">
-      <p class="q-label">What is your top priority and why? Or is there something missing from this list?</p>
-      <textarea placeholder="Share your thoughts…" onchange="sa('s3a_comment',this.value)">${ga('s3a_comment')||''}</textarea>
-    </div>
+  </div>
+  <div class="q-block">
+    <p class="q-label">Which statement best reflects your view on how Comox should approach new housing?</p>
+    <div class="option-grid">${renderRadio('s3_housing',['Housing should be built as quickly and broadly as possible to meet provincial targets','Housing should be prioritized for missing middle — gentle density that fits neighbourhood character','Housing should focus on specific types — seniors downsizing, assisted living, affordable rental','New housing must align with OCP growth areas, infrastructure capacity and climate targets','A mix of all of the above, balanced against neighbourhood impact','I need more information before forming a view'],'s3_housing')}</div>
   </div>
   <div class="q-block">
     <p class="q-label">What has been the best change to Comox in the last four years?</p>
