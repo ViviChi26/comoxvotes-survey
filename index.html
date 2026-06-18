@@ -86,6 +86,7 @@ select:focus,input[type="email"]:focus,input[type="text"]:focus{outline:none;bor
 .btn-lg{padding:15px 34px;font-size:16px;border-radius:10px}
 .nav-step{font-size:14px;color:#999}
 .error-msg{font-size:14px;color:#A32D2D;margin-top:6px}
+.q-block.has-error{border:1.5px solid #A32D2D;border-radius:12px;padding:1rem;background:#FFF8F8;}
 .submitting-overlay{text-align:center;padding:3rem 1rem}
 .submitting-overlay p{font-size:16px;color:#555;margin-top:1rem}
 .spinner{width:38px;height:38px;border:3px solid #e0e0d8;border-top-color:#1D9E75;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
@@ -188,7 +189,18 @@ function validate(section){
   state.errors=e;
   return Object.keys(e).length===0;
 }
-function nextSection(){if(!validate(state.section)){render();window.scrollTo(0,0);return;}if(state.section<5){state.section++;render();window.scrollTo(0,0);}else{submitSurvey();}}
+function nextSection(){
+  if(!validate(state.section)){
+    render();
+    setTimeout(()=>{
+      const firstErr=document.querySelector('.q-block.has-error');
+      if(firstErr)firstErr.scrollIntoView({behavior:'smooth',block:'center'});
+    },50);
+    return;
+  }
+  if(state.section<5){state.section++;render();window.scrollTo(0,0);}
+  else{submitSurvey();}
+}
 function prevSection(){if(state.section>0){state.section--;render();window.scrollTo(0,0);}}
 function startSurvey(){state.screen='survey';render();}
 async function submitSurvey(){
@@ -250,6 +262,7 @@ async function submitSurvey(){
     'Meet greet interest':['Yes keep informed','Yes more info','Not right now'][a['s6_meetgreet']]||'',
     'Meet greet name':a['s6_mg_name']||'',
     'Meet greet email':a['s6_mg_email']||'',
+    'Three words councillor':a['s6_threewords']||'',
     'Newsletter email':a['s6_newsletter']||'',
     'Submitted at':new Date().toISOString(),
   };
@@ -333,38 +346,19 @@ function renderSection1(){
     <textarea placeholder="Share your thoughts…" onchange="sa('s2_values',this.value)">${ga('s2_values')||''}</textarea>
   </div>
   <div class="q-block">
-    <p class="q-label">What one quality would you most like to see more of in next council?</p>
-    <textarea placeholder="Share your thoughts…" onchange="sa('s2_missing',this.value)">${ga('s2_missing')||''}</textarea>
-  </div>
-  <div class="q-block">
-    <p class="q-label">In your words: what does Comox most need from its next Mayor?</p>
-    <textarea placeholder="Share your thoughts…" onchange="sa('s2_mayor',this.value)">${ga('s2_mayor')||''}</textarea>
-  </div>
-  <div class="q-block">
     <p class="q-label">On a scale of 1 to 10, how well do you feel current Comox council demonstrates the qualities and values you've described?</p>
     ${renderScale('s2_gap',10,'Not at all','Completely')}
     ${state.errors['s2_gap']?`<p class="error-msg">${state.errors['s2_gap']}</p>`:''}
   </div>
   <div class="q-block">
-    <p class="q-label">In a few words — what's the biggest gap you see?</p>
-    <textarea placeholder="Share your thoughts…" onchange="sa('s2_gaptext',this.value)">${ga('s2_gaptext')||''}</textarea>
-  </div>
-  <div class="q-block">
-    <p class="q-label">From everything you've considered, select the 3 qualities you would most use to decide who to vote for on Saturday, October 17, 2026.</p>
-    <p class="q-sub">Select exactly 3</p>
+    <p class="q-label">From everything you've considered, tap to select the 3 qualities you would most use to decide who to vote for on Saturday, October 17, 2026.</p>
+    <p class="q-sub">Tap to select — tap again to remove. Select exactly 3.</p>
+    ${top3.length>0?`<div style="margin-bottom:1rem;padding:1rem;background:#E1F5EE;border:0.5px solid #1D9E75;border-radius:10px"><p style="font-size:13px;font-weight:500;color:#0F6E56;margin-bottom:8px">Your top 3 so far (${top3.length}/3):</p><div style="display:flex;flex-direction:column;gap:6px">${top3.map((item,i)=>`<div style="display:flex;align-items:center;gap:8px;font-size:14px;color:#0F6E56"><span style="width:22px;height:22px;border-radius:50%;background:#1D9E75;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">${i+1}</span><span>${item.split(' — ')[0]}</span></div>`).join('')}</div></div>`:''}
     <div class="option-grid">
-      ${ALL_QUALITIES.map(item=>{
-        const sel=top3.includes(item);
-        const disabled=!sel&&top3.length>=3;
-        return`<label class="opt${sel?' selected':''}" onclick="if(!${disabled})labelToggle('s2_top3','${item}')">
-          <input type="checkbox" value="${item}" ${sel?'checked':''} ${disabled?'disabled':''} onclick="event.stopPropagation()">
-          <span class="opt-text">${item.split(' — ')[0]}</span>
-        </label>`;
-      }).join('')}
+      ${ALL_QUALITIES.map(item=>{const sel=top3.includes(item);const disabled=!sel&&top3.length>=3;return`<label class="opt${sel?' selected':''}" onclick="${disabled?'void(0)':"labelToggle('s2_top3','"+item+"')"}" style="${disabled?'opacity:0.45;cursor:not-allowed;':'cursor:pointer'}"><span class="opt-text" style="flex:1">${item.split(' — ')[0]}</span><span style="font-size:16px;margin-left:8px;color:${sel?'#1D9E75':'#ccc'};flex-shrink:0">${sel?'✓':disabled?'—':'○'}</span></label>`;}).join('')}
     </div>
     ${state.errors['s2_top3']?`<p class="error-msg">${state.errors['s2_top3']}</p>`:''}
-  </div>`;
-}
+  </div>`;}
 function renderSection2(){
   return`
   <div class="q-block">
@@ -380,6 +374,10 @@ function renderSection2(){
       <p class="q-label">What is your top priority and why? Or is there something missing from this list?</p>
       <textarea placeholder="Share your thoughts…" onchange="sa('s3a_comment',this.value)">${ga('s3a_comment')||''}</textarea>
     </div>
+  </div>
+  <div class="q-block">
+    <p class="q-label">What has been the best change to Comox in the last four years?</p>
+    <textarea placeholder="Share your thoughts…" onchange="sa('s5_best',this.value)">${ga('s5_best')||''}</textarea>
   </div>
   <div class="q-block">
     <p class="q-header">How important is it to you that next council actively works to:</p>
@@ -468,14 +466,7 @@ function renderSection4(){
       ${[['contributions','Receiving campaign contributions from someone directly affected by the decision'],['industry','Working in an industry that benefits from council decisions'],['relationship','Having a personal or business relationship with an applicant or developer'],['none','None of the above — councillors should declare conflicts and proceed'],['all','All of the above'],['notsure','I\'m not sure']].map(([val,label])=>`<label class="opt${(ga('s5_disqualify')||[]).includes(val)?' selected':''}" onclick="labelToggle('s5_disqualify','${val}')"><input type="checkbox" value="${val}" ${(ga('s5_disqualify')||[]).includes(val)?'checked':''} onclick="event.stopPropagation()"><span class="opt-text">${label}</span></label>`).join('')}
     </div>
   </div>
-  <div class="q-block">
-    <p class="q-label">What has been the best change to Comox in the last four years?</p>
-    <textarea placeholder="Share your thoughts…" onchange="sa('s5_best',this.value)">${ga('s5_best')||''}</textarea>
-  </div>
-  <div class="q-block">
-    <p class="q-label">What is one area that could be improved in the next four years?</p>
-    <textarea placeholder="Share your thoughts…" onchange="sa('s5_improve',this.value)">${ga('s5_improve')||''}</textarea>
-  </div>`;
+`;
 }
 function renderSection5(){
   const checks=state.answers['s6_engage']||[];
@@ -502,6 +493,10 @@ function renderSection5(){
     ${knowsCandidate===0||knowsCandidate===1?`<div class="conditional-block"><p class="q-label">Would you and your nominee be interested in attending a casual meet and greet — a chance to ask questions, learn more, and explore what getting involved looks like?</p><div class="option-grid">${renderRadio('s6_meetgreet',['Yes — please keep me informed about upcoming meet and greets','Yes — but I\'d like more information first','Not right now'],'s6_meetgreet')}</div>${wantsMeetGreet()?`<div class="signup-block" style="margin-top:12px"><p>Leave your name and email and we'll be in touch with details.</p><input type="text" class="input-mb" placeholder="Your name" value="${ga('s6_mg_name')||''}" onchange="sa('s6_mg_name',this.value)"><input type="email" placeholder="Your email" value="${ga('s6_mg_email')||''}" onchange="sa('s6_mg_email',this.value)"></div>`:''}</div>`:''}
   </div>
   <div class="q-block">
+    <p class="q-label">In three words, describe your ideal Comox councillor.</p>
+    <input type="text" placeholder="e.g. Honest, curious, brave…" value="${ga('s6_threewords')||''}" onchange="sa('s6_threewords',this.value)">
+  </div>
+  <div class="q-block">
     <p class="q-label">New sign-up for the 2026 election period — leave your email to receive 'For the Love of Comox' updates from comoxvotes.ca</p>
     <input type="email" placeholder="your@email.com" value="${ga('s6_newsletter')||''}" onchange="sa('s6_newsletter',this.value)">
   </div>`;
@@ -509,11 +504,10 @@ function renderSection5(){
 function renderIntro(){
   return`<div class="intro-screen">
     <h2>Welcome, neighbour.</h2>
-    <p>Thank you for taking a few minutes to share your views. Please note this survey is intended for Comox residents, voters, and workers only.</p>
-    <p>We're asking you to help us understand what qualities and values matter most in your next Mayor and Council — and how engaged you want to be in making it happen.</p>
-    <p>We know your time is precious and filling out a survey is about as exciting as watching paint dry — but your responses genuinely help us understand what kind of leadership Comox deserves on <strong>Saturday, October 17, 2026.</strong></p>
+    <p>Thank you for taking a few minutes to share your views. We're asking you to help us understand what qualities and values matter most in your next Mayor and Council — and how engaged you want to be in making it happen.</p>
+    <p>We know your time is precious and filling out a survey is about as exciting as watching paint dry — but your responses genuinely help us understand what kind of leadership neighbourhoods want to vote for on <strong>Saturday, October 17, 2026.</strong></p>
     <div class="intro-meta">
-      <span class="intro-badge"><i class="ti ti-clock"></i> 6–8 minutes</span>
+      <span class="intro-badge"><i class="ti ti-clock"></i> 8–10 minutes</span>
       <span class="intro-badge"><i class="ti ti-shield-check"></i> Completely anonymous</span>
       <span class="intro-badge"><i class="ti ti-map-pin"></i> Comox residents, workers & voters only</span>
     </div>
@@ -573,6 +567,19 @@ function renderResults(){
     <p class="closing-note">Your voice matters. By sharing your views today you are helping shape the kind of leadership and community Comox deserves on October 17, 2026.</p>
     <p class="closing-note">Together, we are neighbours committed to neighbourhood focused, traffic appropriate, context sensitive growth — to stewarding our natural environment, honouring our heritage, and safeguarding what makes Comox, Comox.</p>
     <p style="font-size:15px;color:#888">— The comoxvotes.ca team</p>
+  </div>
+  <div class="result-section">
+    <p style="font-size:14px;font-weight:500;margin-bottom:12px">Your ideal candidate profile</p>
+    <div style="padding:1.25rem;background:#f9f9f7;border-radius:10px;border:0.5px solid #e0e0d8">
+      <p style="font-size:15px;color:#1a1a1a;line-height:1.8">
+        Based on your responses, Comox needs a ${top3.length===3?`councillor who is <strong>${top3[0].split(' — ')[0].toLowerCase()}</strong>, <strong>${top3[1].split(' — ')[0].toLowerCase()}</strong> and <strong>${top3[2].split(' — ')[0].toLowerCase()}</strong>`:'councillor who reflects your values'} —
+        someone rooted in <strong>${neighbourhood}</strong>,
+        who prioritizes <strong>${topS3a.label.toLowerCase()}</strong> and
+        protects <strong>${topS3b.label.toLowerCase()}</strong>.
+        ${ga('s5_height')===3?'They should listen carefully before acting on OCP height changes.':ga('s5_height')===1?'They should support thoughtful densification.':''}
+        ${ga('s6_threewords')?`In your own words: <em>"${ga('s6_threewords')}"</em>.`:''}
+      </p>
+    </div>
   </div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:1.5rem">
     <a href="https://www.comoxvotes.ca" class="btn btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-home"></i> comoxvotes.ca</a>
