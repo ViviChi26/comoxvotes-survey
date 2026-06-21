@@ -109,21 +109,6 @@ select:focus,input[type="email"]:focus,input[type="text"]:focus{outline:none;bor
 .run-highlight p:first-child{font-size:15px;font-weight:500;color:#0F6E56;margin-bottom:4px}
 .run-highlight p:last-child{font-size:14px;color:#0F6E56;line-height:1.6}
 @media(max-width:520px){.survey-card{padding:1.25rem}.corr-grid{grid-template-columns:1fr}.intro-meta{gap:0.75rem}}
-.share-card{background:#fff;border-radius:16px;border:0.5px solid #e0e0d8;padding:1.5rem;max-width:480px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
-.share-card-header{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:0.5px solid #f0f0ea}
-.share-card-logo{width:32px;height:32px;border-radius:8px;background:#1D9E75;display:flex;align-items:center;justify-content:center}
-.share-card-logo svg{width:18px;height:18px;fill:white}
-.share-card-title{font-size:15px;font-weight:600;color:#1D9E75}
-.share-card-subtitle{font-size:12px;color:#999;margin-top:2px}
-.share-pill{display:inline-block;padding:5px 14px;border-radius:20px;font-size:13px;font-weight:500;background:#E1F5EE;color:#0F6E56;margin-bottom:1rem}
-.share-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
-.share-item{padding:10px;border-radius:8px;background:#f9f9f7;border:0.5px solid #e8e8e0}
-.share-item-label{font-size:11px;color:#999;margin-bottom:3px}
-.share-item-val{font-size:13px;font-weight:500;color:#1a1a1a;line-height:1.4}
-.share-qualities{padding:10px 12px;border-radius:8px;background:#f9f9f7;border:0.5px solid #e8e8e0;margin-bottom:1rem}
-.share-qualities-label{font-size:11px;color:#999;margin-bottom:6px}
-.share-qualities-val{font-size:13px;color:#1a1a1a;line-height:1.6}
-.share-footer{font-size:11px;color:#aaa;text-align:center;margin-top:1rem;padding-top:1rem;border-top:0.5px solid #f0f0ea}
 </style>
 </head>
 <body>
@@ -300,25 +285,7 @@ async function submitSurvey(){
   }catch(err){console.error('Submission error:',err);}
   state.screen='results';render();window.scrollTo(0,0);
 }
-function shareProfile(){
-  const top3=state.answers['s2_top3']||[];
-  const neighbourhood=state.answers['s5_neighbourhood']||'Comox';
-  const qualities=top3.length===3?top3.map(q=>q.split(' — ')[0]).join(' · '):'';
-  const threewords=state.answers['s6_threewords']||'';
-  let text=`I just took the comoxvotes.ca neighbour survey.`;
-  if(qualities)text+=`\n\nMy top 3 qualities for Comox council: ${qualities}.`;
-  if(threewords)text+=`\n\nMy ideal councillor in three words: "${threewords}".`;
-  text+=`\n\nVote Saturday October 17, 2026. comoxvotes.com`;
-  if(navigator.share){
-    navigator.share({title:'My Comox Neighbour Profile',text:text,url:'https://www.comoxvotes.com'}).catch(()=>{});
-  } else {
-    navigator.clipboard.writeText(text).then(()=>{
-      const btn=document.getElementById('share-btn');
-      btn.textContent='✓ Copied!';
-      setTimeout(()=>{btn.innerHTML='<i class="ti ti-share"></i> Share my profile';},2000);
-    });
-  }
-}
+
 
 function renderLikert(id,count,labelLeft,labelRight){
   const cur=ga(id);
@@ -619,38 +586,15 @@ function renderResults(){
     <div style="padding:1.25rem;background:#f9f9f7;border-radius:10px;border:0.5px solid #e0e0d8">
       <p style="font-size:15px;color:#1a1a1a;line-height:1.8">
         Based on your responses, Comox needs a ${top3.length===3?`councillor who is <strong>${top3[0].split(' — ')[0].toLowerCase()}</strong>, <strong>${top3[1].split(' — ')[0].toLowerCase()}</strong> and <strong>${top3[2].split(' — ')[0].toLowerCase()}</strong>`:'councillor who reflects your values'} —
-        someone rooted in <strong>${neighbourhood}</strong>,
-        who prioritizes <strong>${topS3a.label.toLowerCase()}</strong> and
+        someone who prioritizes <strong>${topS3a.label.toLowerCase()}</strong> and
         protects <strong>${topS3b.label.toLowerCase()}</strong>.
         ${ga('s5_height')===3?'They should listen carefully before acting on OCP height changes.':ga('s5_height')===1?'They should support thoughtful densification.':''}
         ${ga('s6_threewords')?`In your own words: <em>"${ga('s6_threewords')}"</em>.`:''}
       </p>
     </div>
   </div>
-  <div style="margin-top:1.5rem">
-    <div id="share-card" class="share-card">
-      <div class="share-card-header">
-        <div class="share-card-logo"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
-        <div>
-          <div class="share-card-title">comoxvotes.ca</div>
-          <div class="share-card-subtitle">My Comox Neighbour Profile · October 17, 2026</div>
-        </div>
-      </div>
-      <span class="share-pill">${profile}</span>
-      <div class="share-grid">
-        <div class="share-item"><div class="share-item-label">Neighbourhood</div><div class="share-item-val">${neighbourhood}</div></div>
-        <div class="share-item"><div class="share-item-label">Civic knowledge</div><div class="share-item-val">${civic}/5</div></div>
-        <div class="share-item"><div class="share-item-label">Vote intention</div><div class="share-item-val">${voteIntent}/5</div></div>
-        <div class="share-item"><div class="share-item-label">Top priority</div><div class="share-item-val">${topS3a.label}</div></div>
-      </div>
-      ${top3.length===3?`<div class="share-qualities"><div class="share-qualities-label">My 3 voting decision qualities</div><div class="share-qualities-val">${top3.map(q=>q.split(' — ')[0]).join(' · ')}</div></div>`:''}
-      ${ga('s6_threewords')?`<div class="share-qualities"><div class="share-qualities-label">My ideal councillor in three words</div><div class="share-qualities-val" style="font-style:italic">"${ga('s6_threewords')}"</div></div>`:''}
-      <div class="share-footer">comoxvotes.ca · Share your profile · Vote Saturday October 17, 2026</div>
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:1rem">
-      <button id="share-btn" class="btn btn-primary" onclick="shareProfile()" style="display:inline-flex;align-items:center;gap:6px"><i class="ti ti-share"></i> Share my profile</button>
-      <a href="https://www.comoxvotes.ca" class="btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-home"></i> comoxvotes.ca</a>
-    </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:1.5rem">
+    <a href="https://www.comoxvotes.ca" class="btn btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-home"></i> comoxvotes.ca</a>
   </div>`;
 }
 function render(){
