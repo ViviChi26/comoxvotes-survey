@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Neighbour Survey — comoxvotes.ca</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/tabler-icons.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f0;color:#1a1a1a;min-height:100vh;padding:2rem 1rem;font-size:16px}
@@ -177,34 +176,17 @@ function top3Toggle(item,disabled,e){
 function ocpHowToggle(val,e){if(e){e.stopPropagation();e.preventDefault();}toggleCheck('s5_ocp_how',val);}
 function disqualifyToggle(val,e){
   if(e){e.stopPropagation();e.preventDefault();}
-  const allVals=['contributions','industry','relationship','all','notsure'];
   const exclusiveVals=['contributions','industry','relationship'];
+  const cur=state.answers['s5_disqualify']||[];
   if(val==='all'){
-    const cur=state.answers['s5_disqualify']||[];
-    if(cur.includes('all')){
-      // deselect all
-      sa('s5_disqualify',[]);
-    } else {
-      // select all exclusive options plus 'all'
-      sa('s5_disqualify',[...exclusiveVals,'all']);
-    }
-  } else if(val==='none'){
-    const cur=state.answers['s5_disqualify']||[];
-    if(cur.includes('none')){
-      sa('s5_disqualify',[]);
-    } else {
-      sa('s5_disqualify',['none']);
-    }
-  } else if(val==='notsure'){
-    const cur=state.answers['s5_disqualify']||[];
-    if(cur.includes('notsure')){
-      sa('s5_disqualify',[]);
-    } else {
-      sa('s5_disqualify',['notsure']);
-    }
+    if(cur.includes('all')){sa('s5_disqualify',[]);}
+    else{sa('s5_disqualify',[...exclusiveVals,'all']);}
+  } else if(val==='none'||val==='notsure'){
+    if(cur.includes(val)){sa('s5_disqualify',[]);}
+    else{sa('s5_disqualify',[val]);}
   } else {
-    // regular option - remove none/notsure/all if present
-    const cur=(state.answers['s5_disqualify']||[]).filter(v=>v!=='none'&&v!=='notsure'&&v!=='all');
+    // if none or notsure or all selected, clear them first
+    if(cur.includes('none')||cur.includes('notsure')||cur.includes('all'))return;
     const next=cur.includes(val)?cur.filter(v=>v!==val):[...cur,val];
     sa('s5_disqualify',next);
   }
@@ -337,29 +319,7 @@ function shareProfile(){
     });
   }
 }
-function downloadCard(){
-  const card = document.getElementById('share-card');
-  if(!card) return;
-  const btn = document.getElementById('download-btn');
-  btn.textContent = 'Generating…';
-  btn.disabled = true;
-  html2canvas(card, {
-    scale: 2,
-    backgroundColor: '#ffffff',
-    useCORS: true,
-    logging: false
-  }).then(canvas => {
-    const link = document.createElement('a');
-    link.download = 'comoxvotes-my-profile.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-    btn.textContent = '⬇ Save my results';
-    btn.disabled = false;
-  }).catch(()=>{
-    btn.textContent = '⬇ Save my results';
-    btn.disabled = false;
-  });
-}
+
 function renderLikert(id,count,labelLeft,labelRight){
   const cur=ga(id);
   let html='<div class="likert-row">';
@@ -584,7 +544,7 @@ function renderSection5(){
     ${knowsCandidate===0||knowsCandidate===1?`<div class="conditional-block"><p class="q-label">Would you and your nominee be interested in attending a casual meet and greet — a chance to ask questions, learn more, and explore what getting involved looks like?</p><div class="option-grid">${renderRadio('s6_meetgreet',['Yes — please keep me informed about upcoming meet and greets','Yes — but I\'d like more information first','Not right now'],'s6_meetgreet')}</div>${wantsMeetGreet()?`<div class="signup-block" style="margin-top:12px"><p>Leave your name and email and we'll be in touch with details.</p><input type="text" class="input-mb" placeholder="Your name" value="${ga('s6_mg_name')||''}" onchange="sa('s6_mg_name',this.value)"><input type="email" placeholder="Your email" value="${ga('s6_mg_email')||''}" onchange="sa('s6_mg_email',this.value)"></div>`:''}</div>`:''}
   </div>
   <div class="q-block">
-    <p class="q-label">New sign-up for the 2026 election period — leave your email to receive 'For the Love of Comox' updates from comoxvotes.ca</p>
+    <p class="q-label">Sign up for Comox Votes updates &amp; newsletter</p>
     <input type="email" placeholder="your@email.com" value="${ga('s6_newsletter')||''}" onchange="sa('s6_newsletter',this.value)">
   </div>`;
 }
@@ -644,8 +604,7 @@ function renderResults(){
       <div class="corr-item"><p class="corr-title">OCP height change</p><p class="corr-val">${ga('s5_height')!==undefined?heightLabels[ga('s5_height')]:'—'}</p></div>
       <div class="corr-item"><p class="corr-title">Top community priority</p><p class="corr-val">${topS3a.label}</p></div>
       <div class="corr-item"><p class="corr-title">Top environmental priority</p><p class="corr-val">${topS3b.label}</p></div>
-      <div class="corr-item"><p class="corr-title">Council gap score</p><p class="corr-val">${gapScore}/10</p></div>
-      <div class="corr-item"><p class="corr-title">Public trust score</p><p class="corr-val">${trustScore}/10</p></div>
+
     </div>
     ${top3.length===3?`<div style="margin-top:12px;padding:12px;border-radius:8px;background:#f9f9f7;border:0.5px solid #e8e8e0"><p class="corr-title">Your 3 voting decision qualities</p><p style="font-size:15px;color:#1a1a1a;line-height:1.6;margin-top:4px">${top3.map(q=>q.split(' — ')[0]).join(' · ')}</p></div>`:''}
   </div>
@@ -689,8 +648,7 @@ function renderResults(){
       <div class="share-footer">comoxvotes.ca · Share your profile · Vote Saturday October 17, 2026</div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:1rem">
-      <button id="download-btn" class="btn btn-primary" onclick="downloadCard()" style="display:inline-flex;align-items:center;gap:6px"><i class="ti ti-download"></i> Save my results</button>
-      <button id="share-btn" class="btn" onclick="shareProfile()" style="display:inline-flex;align-items:center;gap:6px"><i class="ti ti-share"></i> Share my profile</button>
+      <button id="share-btn" class="btn btn-primary" onclick="shareProfile()" style="display:inline-flex;align-items:center;gap:6px"><i class="ti ti-share"></i> Share my profile</button>
       <a href="https://www.comoxvotes.ca" class="btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-home"></i> comoxvotes.ca</a>
     </div>
   </div>`;
