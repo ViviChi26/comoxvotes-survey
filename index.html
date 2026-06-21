@@ -126,12 +126,13 @@ select:focus,input[type="email"]:focus,input[type="text"]:focus{outline:none;bor
 <script>
 const FORMSPREE='https://formspree.io/f/mykazpgv';
 const SECTIONS=[
-  {title:'Your neighbourhood',label:'Section 1 of 6',desc:''},
-  {title:'Leadership qualities',label:'Section 2 of 6',desc:'Help us understand what qualities and values matter most in your next Mayor and Council.'},
-  {title:'Community priorities',label:'Section 3 of 6',desc:'Tell us what issues matter most and what you want the next council to protect and preserve.'},
-  {title:'Your council knowledge',label:'Section 4 of 6',desc:"A quick check on what's on your radar — no pressure, this helps us understand where neighbours are starting from."},
-  {title:'Priorities and OCP',label:'Section 5 of 6',desc:'Share your views on recent planning decisions and what kind of Comox you want in the future.'},
-  {title:'Your level of engagement',label:'Section 6 of 6',desc:'How do you see yourself showing up between now and Saturday, October 17, 2026?'},
+  {title:'Your neighbourhood',label:'Section 1 of 7',desc:''},
+  {title:'Leadership qualities',label:'Section 2 of 7',desc:'Help us understand what qualities and values matter most in your next Mayor and Council.'},
+  {title:'Community priorities',label:'Section 3 of 7',desc:'Tell us what issues matter most and what you want the next council to protect and preserve.'},
+  {title:'Your council knowledge',label:'Section 4 of 7',desc:"A quick check on what's on your radar — no pressure, this helps us understand where neighbours are starting from."},
+  {title:'Planning and OCP',label:'Section 5 of 7',desc:'Share your views on recent planning decisions and what kind of Comox you want in the future.'},
+  {title:'Governance and trust',label:'Section 6 of 7',desc:'Share your views on how council decisions should be made and what accountability looks like.'},
+  {title:'Your level of engagement',label:'Section 7 of 7',desc:'How do you see yourself showing up between now and Saturday, October 17, 2026?'},
 ];
 const Q1_ITEMS=['Kind and caring','Communicative','Transparent','Accountable','Courageous'];
 const Q2_ITEMS=['Preparedness — does the research before the meeting','Critical systems thinking — sees how decisions connect to strategies','Role clarity — knows the difference between council, management and community roles','Digital literacy — understands how emerging technology, data and AI impact municipal decisions and citizen privacy'];
@@ -195,7 +196,7 @@ function validate(section){
     if(!state.answers['s5_neighbourhood'])e['s5_neighbourhood']='Please select your neighbourhood';
     if(state.answers['s5_ocp_participated']===undefined)e['s5_ocp_participated']='Please select an answer';
   }
-  if(section===5){
+  if(section===6){
     if(state.answers['s6_vote']===undefined)e['s6_vote']='Please select a rating';
   }
   state.errors=e;
@@ -210,7 +211,7 @@ function nextSection(){
     },50);
     return;
   }
-  if(state.section<5){state.section++;render();window.scrollTo(0,0);}
+  if(state.section<6){state.section++;render();window.scrollTo(0,0);}
   else{submitSurvey();}
 }
 function prevSection(){if(state.section>0){state.section--;render();window.scrollTo(0,0);}}
@@ -303,7 +304,20 @@ function renderScale(id,count,labelLeft,labelRight){
   return html;
 }
 function renderRadio(name,opts,answerId){
-  return opts.map((opt,i)=>{const sel=ga(answerId)===i;return`<label class="opt${sel?' selected':''}" onclick="event.stopPropagation();sa('${answerId}',${i})"><input type="radio" name="${name}" value="${i}" ${sel?'checked':''} onclick="event.stopPropagation()"><span class="opt-text">${opt}</span></label>`;}).join('');
+  return opts.map((opt,i)=>{
+    const sel=ga(answerId)===i;
+    const id=name+'_'+i;
+    return`<label class="opt${sel?' selected':''}" for="${id}" onclick="event.preventDefault();event.stopPropagation();saRadio('${answerId}',${i},this)"><input type="radio" id="${id}" name="${name}" value="${i}" ${sel?'checked':''} tabindex="-1"><span class="opt-text">${opt}</span></label>`;
+  }).join('');
+}
+function saRadio(id,val,el){
+  state.answers[id]=val;
+  state.errors[id]=false;
+  document.querySelectorAll('[name="'+id+'"]').forEach(inp=>{
+    inp.closest('label').classList.toggle('selected', parseInt(inp.value)===val);
+    inp.checked=(parseInt(inp.value)===val);
+  });
+  setTimeout(()=>render(),10);
 }
 function renderRatingBlock(prefix,items,groupLabel){
   return`<div class="rating-group">
@@ -343,7 +357,7 @@ function renderSection0(){
       <p class="scenario-title">The 150-year-old tree</p>
       <p class="scenario-text">Over two years, several neighbours on your street each remove large mature trees from their properties — one by one, each decision seeming reasonable on its own. By the third summer, two properties now have standing water after every rain. The natural drainage of the neighbourhood has changed. A 150-year-old tree nearby is now at risk — its root system weakened, its nesting habitat disappearing. Nobody broke any rules.</p>
       <p class="scenario-q">Who is responsible?</p>
-      <div class="option-grid">${renderRadio('s1_tree',['Each neighbour made their own legal decision — no one is at fault','The neighbourhood collectively should have thought ahead','The town needs bylaws that consider cumulative neighbourhood impact — not just individual properties','It\'s complicated — individual rights and community consequences are both real','I\'m not sure'],'s1_tree')}</div>
+      <div class="option-grid">${renderRadio('s1_tree',['Each neighbour made their own legal decision — no one is at fault','The neighbourhood collectively should have thought ahead','The town needs bylaws that consider cumulative neighbourhood impact — not just individual properties','It\'s complicated — individual rights and community consequences are both real','Not sure'],'s1_tree')}</div>
       <p class="bridge-text">Council decisions can have consequences that only appear months or years later — and often affect people who had no say in the original decision.</p>
     </div>
   </div>`;
@@ -421,7 +435,7 @@ function renderSection4(){
   <div class="q-block">
     <p class="q-label">How long have you lived or worked in Comox?</p>
     <div class="option-grid">
-      ${renderRadio('s5_years',['Less than 2 years','2–5 years','6–10 years','11–20 years','More than 20 years','Longer'],'s5_years')}
+      ${renderRadio('s5_years',['Less than 2 years','2 to 5 years','6 to 10 years','11 to 20 years','More than 20 years','Longer'],'s5_years')}
     </div>
     ${ga('s5_years')==='5'||ga('s5_years')===5?`<div style="margin-top:10px"><p class="q-sub">How many years? We'd love to know.</p><input type="text" placeholder="e.g. 45 years" value="${ga('s5_years_open')||''}" onchange="sa('s5_years_open',this.value)"></div>`:''}
     ${state.errors['s5_years']?`<p class="error-msg">${state.errors['s5_years']}</p>`:''}
@@ -437,14 +451,14 @@ function renderSection4(){
   </div>
   <div class="q-block">
     <p class="q-label">Did you participate in the Town of Comox OCP update process over the past 18 months?</p>
-    <div class="option-grid">${renderRadio('s5_ocp_participated',['Yes — I participated','No — I was aware but chose not to participate','No — I wasn\'t aware it was happening'],'s5_ocp_participated')}</div>
+    <div class="option-grid">${renderRadio('s5_ocp_participated',['Yes — I participated','No — I was aware but chose not to participate','No — I was not aware it was happening'],'s5_ocp_participated')}</div>
     ${state.errors['s5_ocp_participated']?`<p class="error-msg">${state.errors['s5_ocp_participated']}</p>`:''}
     ${participated===0?`<div class="conditional-block"><p class="q-label">How did you participate? Select all that apply.</p><div class="option-grid">${[['survey','Filled out the Town of Comox online survey'],['openhouse','Attended an open house'],['letter','Wrote a letter or email to council'],['hearing','Attended a public hearing'],['spoke','Spoke at a public hearing'],['other','Other']].map(([val,label])=>`<label class="opt${(ga('s5_ocp_how')||[]).includes(val)?' selected':''}" onclick="ocpHowToggle('${val}',event)"><input type="checkbox" value="${val}" ${(ga('s5_ocp_how')||[]).includes(val)?'checked':''} onclick="event.stopPropagation()"><span class="opt-text">${label}</span></label>`).join('')}</div></div>`:''}
-    ${participated===1?`<div class="conditional-block"><p class="q-label">What was the main reason you didn't participate?</p><div class="option-grid">${renderRadio('s5_ocp_why',['Not enough time','Didn\'t feel my input would make a difference','Didn\'t know enough about the OCP to contribute','Other'],'s5_ocp_why')}</div></div>`:''}
+    ${participated===1?`<div class="conditional-block"><p class="q-label">What was the main reason you didn't participate?</p><div class="option-grid">${renderRadio('s5_ocp_why',['Not enough time','Did not feel my input would make a difference','Did not know enough about the OCP to contribute','Other'],'s5_ocp_why')}</div></div>`:''}
   </div>
   <div class="q-block">
     <p class="q-label">The newly adopted Comox Official Community Plan now includes a change from a 4 storey to 6 storey town baseline building height. Do you feel this reflects the kind of height that's right for Comox?</p>
-    <div class="option-grid">${renderRadio('s5_height',['I wasn\'t aware of this change in the new OCP','Yes, I support this direction','I need more information before deciding','No, I do not support this direction'],'s5_height')}</div>
+    <div class="option-grid">${renderRadio('s5_height',['I was not aware of this change in the new OCP','Yes, I support this direction','I need more information before deciding','No, I do not support this direction'],'s5_height')}</div>
   </div>
   <div class="q-block">
     <p class="q-label">Do you feel 6 storeys is appropriate across all Comox neighbourhoods — not just downtown?</p>
@@ -452,7 +466,7 @@ function renderSection4(){
   </div>
   <div class="q-block">
     <p class="q-label">The new Comox OCP was adopted in February 2026. How soon do you feel council should be able to consider amendments or changes to it?</p>
-    <div class="option-grid">${renderRadio('s5_ocp_amend',['Not for at least 12 months','Not for at least 2 years','Only at the mandatory 5-year review','Council should be able to amend at any time','I\'m not sure'],'s5_ocp_amend')}</div>
+    <div class="option-grid">${renderRadio('s5_ocp_amend',['Not for at least 12 months','Not for at least 2 years','Only at the mandatory 5-year review','Council should be able to amend at any time','Not sure'],'s5_ocp_amend')}</div>
   </div>
   <div class="q-block">
     <p class="q-label">The new OCP baseline building height change from 4 to 6 storeys was decided in a 4 to 3 split vote. On a scale of 1 to 10, how important is it that major OCP decisions reflect broader community consensus?</p>
@@ -460,12 +474,17 @@ function renderSection4(){
   </div>
   <div class="q-block">
     <p class="q-label">The Town of Comox's new 20-year growth forecast has doubled previous housing targets. Which statement best reflects your view?</p>
-    <div class="option-grid">${renderRadio('s5_growth',['Growth is needed and the new targets feel about right for Comox','Some densification is needed — but it should be scaled to our infrastructure and community character','Densification should be focused in the 6 OCP growth areas — protecting established neighbourhoods','I support the densification direction but the traffic, services and neighbourhood character impacts need to be resolved first','I wasn\'t aware of the new growth forecast','I\'d like more information before forming a view'],'s5_growth')}</div>
+    <div class="option-grid">${renderRadio('s5_growth',['Growth is needed and the new targets feel about right for Comox','Some densification is needed — but it should be scaled to our infrastructure and community character','Densification should be focused in the 6 OCP growth areas — protecting established neighbourhoods','I support the densification direction but the traffic, services and neighbourhood character impacts need to be resolved first','I was not aware of the new growth forecast','I would like more information before forming a view'],'s5_growth')}</div>
   </div>
   <div class="q-block">
     <p class="q-label">Do you feel the Town of Comox has an adequate traffic and transportation strategy to support its new 20-year growth forecast?</p>
-    <div class="option-grid">${renderRadio('s5_traffic',['Yes — our roads and transit can handle projected growth','No — our infrastructure cannot support this level of growth','I wasn\'t aware of the new 20-year growth forecast','I need more information before deciding'],'s5_traffic')}</div>
+    <div class="option-grid">${renderRadio('s5_traffic',['Yes — our roads and transit can handle projected growth','No — our infrastructure cannot support this level of growth','I was not aware of the new 20-year growth forecast','I need more information before deciding'],'s5_traffic')}</div>
   </div>
+
+`;
+}
+function renderSection4b(){
+  return`
   <div class="q-block">
     <p class="q-label">On a scale of 1 to 10, how well does current Town of Comox council decision-making serve the interests of the whole community?</p>
     ${renderScale('s5_trust',10,'Poorly','Very well')}
@@ -481,7 +500,7 @@ function renderSection4(){
   <div class="q-block">
     <p class="q-label">Which of the following do you feel should disqualify a councillor from voting on a matter? Select all that apply.</p>
     <div class="option-grid">
-      ${[['contributions','Receiving campaign contributions from someone directly affected by the decision'],['industry','Working in an industry that benefits from council decisions'],['relationship','Having a personal or business relationship with an applicant or developer'],['none','None of the above — declaring a conflict of interest is sufficient'],['all','All of the above'],['notsure','I\'m not sure']].map(([val,label])=>`<label class="opt${(ga('s5_disqualify')||[]).includes(val)?' selected':''}" onclick="disqualifyToggle('${val}',event)"><input type="checkbox" value="${val}" ${(ga('s5_disqualify')||[]).includes(val)?'checked':''} onclick="event.stopPropagation()"><span class="opt-text">${label}</span></label>`).join('')}
+      ${[['contributions','Receiving campaign contributions from someone directly affected by the decision'],['industry','Working in an industry that benefits from council decisions'],['relationship','Having a personal or business relationship with an applicant or developer'],['none','None of the above — declaring a conflict of interest is sufficient'],['all','All of the above'],['notsure','Not sure']].map(([val,label])=>`<label class="opt${(ga('s5_disqualify')||[]).includes(val)?' selected':''}" onclick="disqualifyToggle('${val}',event)"><input type="checkbox" value="${val}" ${(ga('s5_disqualify')||[]).includes(val)?'checked':''} onclick="event.stopPropagation()"><span class="opt-text">${label}</span></label>`).join('')}
     </div>
   </div>
 `;
@@ -611,6 +630,7 @@ function render(){
   else if(state.section===2)body=renderSection2();
   else if(state.section===3)body=renderSection3();
   else if(state.section===4)body=renderSection4();
+  else if(state.section===5)body=renderSection4b();
   else body=renderSection5();
   app.innerHTML=`
     <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
@@ -621,8 +641,8 @@ function render(){
     ${body}
     <div class="nav-row">
       <button class="btn" onclick="prevSection()" ${state.section===0?'disabled':''}>← Back</button>
-      <span class="nav-step">${state.section+1} of 6</span>
-      <button class="btn btn-primary" onclick="nextSection()">${state.section===5?'Submit survey →':'Next →'}</button>
+      <span class="nav-step">${state.section+1} of 7</span>
+      <button class="btn btn-primary" onclick="nextSection()">${state.section===6?'Submit survey →':'Next →'}</button>
     </div>`;
 }
 render();
