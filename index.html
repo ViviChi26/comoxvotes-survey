@@ -57,6 +57,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .scale-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
 .scale-btn{flex:1;min-width:30px;padding:9px 2px;text-align:center;font-size:13px;border:0.5px solid #e0e0d8;border-radius:6px;cursor:pointer;background:#fff;color:#1a1a1a;transition:all 0.15s;font-family:inherit}
 .scale-btn:hover{border-color:#bbb;background:#f9f9f7}
+.scale-btn,.lk-btn,.opt{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
 .scale-btn.selected{border-color:#1D9E75;background:#1D9E75;color:#fff}
 .scale-labels{display:flex;justify-content:space-between;margin-top:4px}
 .scale-label{font-size:12px;color:#999;max-width:45%;line-height:1.3}
@@ -153,6 +154,10 @@ const ga=id=>state.answers[id];
 function sa(id,val){state.answers[id]=val;state.errors[id]=false;render();}
 function toggleCheck(id,val){const cur=state.answers[id]||[];const next=cur.includes(val)?cur.filter(v=>v!==val):[...cur,val];sa(id,next);}
 function labelToggle(id,val,e){if(e){e.stopPropagation();e.preventDefault();}toggleCheck(id,val);}
+function top3Toggle(item,disabled,e){
+  if(e){e.stopPropagation();e.preventDefault();}
+  if(!disabled) toggleCheck('s2_top3', item);
+}
 function revealQ(id){state.knowledgeRevealed[id]=true;render();}
 function getCivicScore(){return KNOWLEDGE_QS.filter(q=>state.answers[q.id]===q.correct).length;}
 function getEngagementScore(){return(state.answers['s6_engage']||[]).length;}
@@ -276,7 +281,7 @@ async function submitSurvey(){
 function renderLikert(id,count,labelLeft,labelRight){
   const cur=ga(id);
   let html='<div class="likert-row">';
-  for(let i=0;i<count;i++)html+=`<button class="lk-btn${cur===i?' selected':''}" onclick="event.stopPropagation();sa('${id}',${i})">${i+1}</button>`;
+  for(let i=0;i<count;i++)html+=`<button class="lk-btn${cur===i?' selected':''}" onclick="event.stopPropagation();sa('${id}',${i})" ontouchend="event.preventDefault();event.stopPropagation();sa('${id}',${i})">${i+1}</button>`;
   html+='</div>';
   if(labelLeft)html+=`<div class="lk-labels"><span class="lk-label">${labelLeft}</span><span class="lk-label">${labelRight}</span></div>`;
   return html;
@@ -284,7 +289,7 @@ function renderLikert(id,count,labelLeft,labelRight){
 function renderScale(id,count,labelLeft,labelRight){
   const cur=ga(id);
   let html='<div class="scale-row">';
-  for(let i=0;i<count;i++)html+=`<button class="scale-btn${cur===i?' selected':''}" onclick="event.stopPropagation();sa('${id}',${i})">${i+1}</button>`;
+  for(let i=0;i<count;i++)html+=`<button class="scale-btn${cur===i?' selected':''}" onclick="event.stopPropagation();sa('${id}',${i})" ontouchend="event.preventDefault();event.stopPropagation();sa('${id}',${i})">${i+1}</button>`;
   html+=`</div><div class="scale-labels"><span class="scale-label">${labelLeft}</span><span class="scale-label">${labelRight}</span></div>`;
   return html;
 }
@@ -355,7 +360,7 @@ function renderSection1(){
     <p class="q-sub">Tap to select — tap again to remove. Select exactly 3.</p>
     ${top3.length>0?`<div style="margin-bottom:1rem;padding:1rem;background:#E1F5EE;border:0.5px solid #1D9E75;border-radius:10px"><p style="font-size:13px;font-weight:500;color:#0F6E56;margin-bottom:8px">Your top 3 so far (${top3.length}/3):</p><div style="display:flex;flex-direction:column;gap:6px">${top3.map((item,i)=>`<div style="display:flex;align-items:center;gap:8px;font-size:14px;color:#0F6E56"><span style="width:22px;height:22px;border-radius:50%;background:#1D9E75;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">${i+1}</span><span>${item.split(' — ')[0]}</span></div>`).join('')}</div></div>`:''}
     <div class="option-grid">
-      ${ALL_QUALITIES.map(item=>{const sel=top3.includes(item);const disabled=!sel&&top3.length>=3;return`<label class="opt${sel?' selected':''}" onclick="event.stopPropagation();event.preventDefault();${disabled?'void(0)':"labelToggle('s2_top3','"+item+"')"}" style="${disabled?'opacity:0.45;cursor:not-allowed;':'cursor:pointer'}"><span class="opt-text" style="flex:1">${item.split(' — ')[0]}</span><span style="font-size:16px;margin-left:8px;color:${sel?'#1D9E75':'#ccc'};flex-shrink:0">${sel?'✓':disabled?'—':'○'}</span></label>`;}).join('')}
+      ${ALL_QUALITIES.map(item=>{const sel=top3.includes(item);const disabled=!sel&&top3.length>=3;return`<label class="opt${sel?' selected':''}" onclick="top3Toggle('${item}',${disabled},event)" style="${disabled?'opacity:0.45;cursor:not-allowed;':'cursor:pointer'}"><span class="opt-text" style="flex:1">${item.split(' — ')[0]}</span><span style="font-size:16px;margin-left:8px;color:${sel?'#1D9E75':'#ccc'};flex-shrink:0">${sel?'✓':disabled?'—':'○'}</span></label>`;}).join('')}
     </div>
     ${state.errors['s2_top3']?`<p class="error-msg">${state.errors['s2_top3']}</p>`:''}
   </div>`;}
@@ -457,7 +462,7 @@ function renderSection4(){
     ${renderScale('s5_opposition',10,'Not at all — council is elected to decide','Completely — council must follow community direction')}
   </div>
   <div class="q-block">
-    <p class="q-label">On a scale of 1 to 10, how important is it that Comox councillors have no financial relationships — past or present — with individuals or businesses that may benefit from their decisions?</p>
+    <p class="q-label">On a scale of 1 to 10, how important is it that elected Mayor and Council have no financial relationships — past or present — with individuals or businesses that may directly benefit from their decisions?</p>
     ${renderScale('s5_armslength',10,'Not important — councillors can manage conflicts professionally','Essential — financial independence is non-negotiable')}
   </div>
   <div class="q-block">
