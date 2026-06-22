@@ -343,7 +343,7 @@ function renderRatingBlock(prefix,items,groupLabel){
 function renderSection0(){
   return`
   <div class="q-block">
-    <p style="font-size:16px;color:#444;line-height:1.8;margin-bottom:1.5rem;padding:1.25rem;background:#f9f9f7;border-radius:10px;border:0.5px solid #e0e0d8">Before we ask about leadership qualities, we want to ground this survey in something familiar — your neighbourhood. Council members face decisions every day that are a lot like the situations neighbours face with each other. Consider these three scenarios — they may feel closer to home than you think. There are no right or wrong answers.</p>
+    <p style="font-size:16px;color:#444;line-height:1.8;margin-bottom:1.5rem;padding:1.25rem;background:#f9f9f7;border-radius:10px;border:0.5px solid #e0e0d8">Before we ask about leadership qualities, we want to ground this survey in something familiar — your neighbourhood. Council members face decisions every day that are a lot like the situations neighbours face with each other. Consider these three scenarios. There are no right or wrong answers.</p>
   </div>
   <div class="q-block">
     <div class="scenario-box">
@@ -572,6 +572,7 @@ function renderIntro(){
       <span class="intro-badge"><i class="ti ti-shield-check"></i> Completely anonymous</span>
       <span class="intro-badge"><i class="ti ti-map-pin"></i> Comox residents, workers & voters only</span>
     </div>
+    <p style="font-size:14px;color:#888;line-height:1.7;margin-bottom:1.5rem;padding-top:1rem;border-top:0.5px solid #e0e0d8">Comox's neighbourhoods sit on the unceded traditional territory of the K'ómoks, Pentlatch, E'iksan, Sasitla, and Sahtloot peoples.</p>
     <button class="btn btn-primary btn-lg" onclick="startSurvey()">Start the survey →</button>
     <p class="intro-note">No personal information is collected unless you choose to share it at the end.</p>
   </div>`;
@@ -624,11 +625,6 @@ function renderResults(){
   </div>
   ${hasRun?`<div class="run-highlight"><p><i class="ti ti-star"></i> You said you'd consider running!</p><p>That's exactly the kind of neighbour Comox needs. The comoxvotes.ca team will be in touch.</p></div>`:''}
   <div class="result-section">
-    <p class="closing-note">Your voice matters. By sharing your views today you are helping shape the kind of leadership and community Comox deserves on October 17, 2026.</p>
-    <p class="closing-note">Together, we are neighbours committed to neighbourhood focused, traffic appropriate, context sensitive growth — to stewarding our natural environment, honouring our heritage, and safeguarding what makes Comox, Comox.</p>
-    <p style="font-size:15px;color:#888">— The comoxvotes.ca team</p>
-  </div>
-  <div class="result-section">
     <p style="font-size:14px;font-weight:500;margin-bottom:12px">Your ideal candidate profile</p>
     <div style="padding:1.25rem;background:#f9f9f7;border-radius:10px;border:0.5px solid #e0e0d8">
       <p style="font-size:15px;color:#1a1a1a;line-height:1.8">
@@ -639,6 +635,12 @@ function renderResults(){
         ${ga('s6_threewords')?`In your own words: <em>"${ga('s6_threewords')}"</em>.`:''}
       </p>
     </div>
+  </div>
+  <div class="result-section">
+    <p class="closing-note">Your voice matters. By sharing your views today you are helping shape the kind of leadership and community Comox deserves on October 17, 2026.</p>
+    <p class="closing-note">Together, we are neighbours committed to neighbourhood focused, traffic appropriate, context sensitive growth — to stewarding our natural environment, honouring our heritage, and safeguarding what makes Comox, Comox.</p>
+    <p style="font-size:14px;color:#666;line-height:1.8;font-style:italic;margin-bottom:1rem">With grace, we feel honoured and privileged to live, work, and serve in the unceded traditional territory of the K'ómoks, Pentlatch, E'iksan, Sasitla, and Sahtloot peoples.</p>
+    <p style="font-size:15px;color:#888">— The comoxvotes.ca team</p>
   </div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:1.5rem">
     <a href="https://www.comoxvotes.ca" class="btn btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px"><i class="ti ti-home"></i> comoxvotes.ca</a>
