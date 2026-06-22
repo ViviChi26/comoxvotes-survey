@@ -139,6 +139,18 @@ const Q2_ITEMS=['Preparedness — does the research before the meeting','Critica
 const Q3_ITEMS=['Shows up, is present, prepared and engaged at every meeting','Attends and listens at neighbourhood meetings','Asks questions before deciding','Offers practical solutions not just positions','Works collaboratively to find solutions'];
 const Q4_ITEMS=['Community stewardship — long-term thinking over short-term wins','Civic courage — puts community wellbeing above political convenience','Committed to strengthening public trust — through council votes and community actions','Rooted in community-led leadership — not personal agenda or political pressure'];
 const ALL_QUALITIES=[...Q1_ITEMS,...Q2_ITEMS,...Q3_ITEMS,...Q4_ITEMS];
+const TOP3_QUALITIES=[
+  'Transparent',
+  'Accountable',
+  'Courageous',
+  'Critical systems thinking — sees how decisions connect to strategies',
+  'Rooted in community-led leadership — not personal agenda or political pressure',
+  'Shows up, is present, prepared and engaged at every meeting',
+  'Works collaboratively to find solutions',
+  'Community stewardship — long-term thinking over short-term wins',
+  'Civic courage — puts community wellbeing above political convenience',
+  'Committed to strengthening public trust — through council votes and community actions',
+];
 const KNOWLEDGE_QS=[
   {id:'k1',q:'Which document guides long-term land use planning in Town of Comox?',opts:['Annual Budget','Official Community Plan (OCP)','Infrastructure Master Plan'],correct:1},
   {id:'k2',q:'When was the Town of Comox Official Community Plan last updated?',opts:['2022','2024','January 2025','February 2026'],correct:3},
@@ -261,6 +273,8 @@ async function submitSurvey(){
     'Public trust score':(a['s5_trust']||0)+1,
     'Rebuild trust':a['s5_trusttext']||'',
     'Arms length score':(a['s5_armslength']||0)+1,
+    'Reconciliation baseline':['Essential','Needs conversation','Needs more info','Not council responsibility'][a['s6_reconciliation']]||'',
+    'Emergency readiness baseline':['Essential','Needs preparation','Needs more info','Not council responsibility'][a['s6_emergency']]||'',
     'Conflict disqualifiers':(a['s5_disqualify']||[]).join(', '),
     'Best change last 4 years':a['s5_best']||'',
     'Improve next 4 years':a['s5_improve']||'',
@@ -387,7 +401,7 @@ function renderSection1(){
     <p class="q-sub">Tap to select — tap again to remove. Select exactly 3.</p>
     ${top3.length>0?`<div style="margin-bottom:1rem;padding:1rem;background:#E1F5EE;border:0.5px solid #1D9E75;border-radius:10px"><p style="font-size:13px;font-weight:500;color:#0F6E56;margin-bottom:8px">Your top 3 so far (${top3.length}/3):</p><div style="display:flex;flex-direction:column;gap:6px">${top3.map((item,i)=>`<div style="display:flex;align-items:center;gap:8px;font-size:14px;color:#0F6E56"><span style="width:22px;height:22px;border-radius:50%;background:#1D9E75;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">${i+1}</span><span>${item.split(' — ')[0]}</span></div>`).join('')}</div></div>`:''}
     <div class="option-grid">
-      ${ALL_QUALITIES.map(item=>{const sel=top3.includes(item);const disabled=!sel&&top3.length>=3;return`<label class="opt${sel?' selected':''}" onclick="top3Toggle('${item}',${disabled},event)" style="${disabled?'opacity:0.45;cursor:not-allowed;':'cursor:pointer'}"><span class="opt-text" style="flex:1">${item.split(' — ')[0]}</span><span style="font-size:16px;margin-left:8px;color:${sel?'#1D9E75':'#ccc'};flex-shrink:0">${sel?'✓':disabled?'—':'○'}</span></label>`;}).join('')}
+      ${TOP3_QUALITIES.map(item=>{const sel=top3.includes(item);const disabled=!sel&&top3.length>=3;return`<label class="opt${sel?' selected':''}" onclick="top3Toggle('${item}',${disabled},event)" style="${disabled?'opacity:0.45;cursor:not-allowed;':'cursor:pointer'}"><span class="opt-text" style="flex:1">${item.split(' — ')[0]}</span><span style="font-size:16px;margin-left:8px;color:${sel?'#1D9E75':'#ccc'};flex-shrink:0">${sel?'✓':disabled?'—':'○'}</span></label>`;}).join('')}
     </div>
     ${state.errors['s2_top3']?`<p class="error-msg">${state.errors['s2_top3']}</p>`:''}
   </div>`;}
@@ -496,6 +510,20 @@ function renderSection4b(){
   <div class="q-block">
     <p class="q-label">On a scale of 1 to 10, how important is it that elected Mayor and Council have no financial relationships — past or present — with individuals or businesses that may directly benefit from their decisions?</p>
     ${renderScale('s5_armslength',10,'Not important — councillors can manage conflicts professionally','Essential — financial independence is non-negotiable')}
+  </div>
+  <div class="q-block">
+    <p class="q-label">The following are qualities we believe every Comox council candidate should bring to the role. Do you agree?</p>
+    <p class="q-sub">Select your view for each</p>
+    <div style="display:flex;flex-direction:column;gap:1.25rem;margin-top:0.5rem">
+      <div>
+        <p class="rating-label" style="margin-bottom:8px">Committed to reconciliation — understands and actively honours the Town of Comox relationship with the K'ómoks First Nation</p>
+        <div class="option-grid">${renderRadio('s6_reconciliation',['Yes — essential baseline','Yes — but needs more community conversation','Need more information','No — not a council responsibility'],'s6_reconciliation')}</div>
+      </div>
+      <div>
+        <p class="rating-label" style="margin-bottom:8px">Prepared for emergency — understands Comox vulnerability to wildfire, flood and climate events and is ready to lead when it matters</p>
+        <div class="option-grid">${renderRadio('s6_emergency',['Yes — essential baseline','Yes — but needs more preparation','Need more information','No — not a council responsibility'],'s6_emergency')}</div>
+      </div>
+    </div>
   </div>
   <div class="q-block">
     <p class="q-label">Which of the following do you feel should disqualify a councillor from voting on a matter? Select all that apply.</p>
