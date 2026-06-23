@@ -318,10 +318,15 @@ function renderScale(id,count,labelLeft,labelRight){
   return html;
 }
 let _lastRadioKey='';let _lastRadioTime=0;
+let _debounceTimer=null;
+function saDebounce(id,val){
+  if(_debounceTimer)clearTimeout(_debounceTimer);
+  _debounceTimer=setTimeout(()=>{sa(id,val);_debounceTimer=null;},150);
+}
 function renderRadio(name,opts,answerId){
   return opts.map((opt,i)=>{
     const sel=ga(answerId)===i;
-    return`<label class="opt${sel?' selected':''}" onclick="event.preventDefault();event.stopPropagation();saRadio('${answerId}',${i})"><input type="radio" name="${name}" value="${i}" ${sel?'checked':''} tabindex="-1"><span class="opt-text">${opt}</span></label>`;
+    return`<label class="opt${sel?' selected':''}" onclick="event.preventDefault();event.stopPropagation();saRadio('${answerId}',${i})" ontouchend="event.preventDefault();event.stopPropagation();saRadio('${answerId}',${i})"><input type="radio" name="${name}" value="${i}" ${sel?'checked':''} tabindex="-1"><span class="opt-text">${opt}</span></label>`;
   }).join('');
 }
 function saRadio(id,val){
@@ -399,7 +404,7 @@ function renderSection1(){
     <p class="q-sub">Tap to select — tap again to remove. Select exactly 3.</p>
     ${top3.length>0?`<div style="margin-bottom:1rem;padding:1rem;background:#E1F5EE;border:0.5px solid #1D9E75;border-radius:10px"><p style="font-size:13px;font-weight:500;color:#0F6E56;margin-bottom:8px">Your top 3 so far (${top3.length}/3):</p><div style="display:flex;flex-direction:column;gap:6px">${top3.map((item,i)=>`<div style="display:flex;align-items:center;gap:8px;font-size:14px;color:#0F6E56"><span style="width:22px;height:22px;border-radius:50%;background:#1D9E75;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">${i+1}</span><span>${item.split(' — ')[0]}</span></div>`).join('')}</div></div>`:''}
     <div class="option-grid">
-      ${TOP3_QUALITIES.map(item=>{const sel=top3.includes(item);const disabled=!sel&&top3.length>=3;return`<label class="opt${sel?' selected':''}" onclick="top3Toggle('${item}',${disabled},event)" style="${disabled?'opacity:0.45;cursor:not-allowed;':'cursor:pointer'}"><span class="opt-text" style="flex:1">${item.split(' — ')[0]}</span><span style="font-size:16px;margin-left:8px;color:${sel?'#1D9E75':'#ccc'};flex-shrink:0">${sel?'✓':disabled?'—':'○'}</span></label>`;}).join('')}
+      ${TOP3_QUALITIES.map(item=>{const sel=top3.includes(item);const disabled=!sel&&top3.length>=3;return`<label class="opt${sel?' selected':''}" onclick="top3Toggle('${item}',${disabled},event)" ontouchend="event.preventDefault();top3Toggle('${item}',${disabled},event)" style="${disabled?'opacity:0.45;cursor:not-allowed;':'cursor:pointer'}"><span class="opt-text" style="flex:1">${item.split(' — ')[0]}</span><span style="font-size:16px;margin-left:8px;color:${sel?'#1D9E75':'#ccc'};flex-shrink:0">${sel?'✓':disabled?'—':'○'}</span></label>`;}).join('')}
     </div>
     ${state.errors['s2_top3']?`<p class="error-msg">${state.errors['s2_top3']}</p>`:''}
   </div>`;}
@@ -434,7 +439,7 @@ function renderSection3(){
     <div class="q-block">
       <p class="q-label">${q.q}</p>
       <div class="option-grid">
-        ${q.opts.map((opt,i)=>{const sel=state.answers[q.id]===i;const rev=state.knowledgeRevealed[q.id];let badge='';if(rev&&sel&&i===q.correct)badge=`<span class="knowledge-badge badge-correct"><i class="ti ti-check"></i> Correct</span>`;else if(rev&&sel&&i!==q.correct)badge=`<span class="knowledge-badge badge-wrong"><i class="ti ti-x"></i> Not quite</span>`;return`<label class="opt${sel?' selected':''}"><input type="radio" name="${q.id}" value="${i}" ${sel?'checked':''} onchange="sa('${q.id}',${i});revealQ('${q.id}')"><span class="opt-text">${opt}${badge}</span></label>`;}).join('')}
+        ${q.opts.map((opt,i)=>{const sel=state.answers[q.id]===i;const rev=state.knowledgeRevealed[q.id];let badge='';if(rev&&sel&&i===q.correct)badge=`<span class="knowledge-badge badge-correct"><i class="ti ti-check"></i> Correct</span>`;else if(rev&&sel&&i!==q.correct)badge=`<span class="knowledge-badge badge-wrong"><i class="ti ti-x"></i> Not quite</span>`;return`<label class="opt${sel?' selected':''}"><input type="radio" name="${q.id}" value="${i}" ${sel?'checked':''} onclick="event.stopPropagation();saRadio('${q.id}',${i});revealQ('${q.id}')" ontouchend="event.preventDefault();event.stopPropagation();saRadio('${q.id}',${i});revealQ('${q.id}')"><span class="opt-text">${opt}${badge}</span></label>`;}).join('')}
       </div>
       ${state.errors[q.id]?`<p class="error-msg">${state.errors[q.id]}</p>`:''}
     </div>`).join('');
@@ -454,7 +459,7 @@ function renderSection4(){
   </div>
   <div class="q-block">
     <p class="q-label">Which Comox neighbourhood do you live in?</p>
-    <select onchange="sa('s5_neighbourhood',this.value)">
+    <select onchange="saDebounce('s5_neighbourhood',this.value)">
       <option value="">— Select your neighbourhood —</option>
       ${NEIGHBOURHOODS.map(n=>`<option value="${n}" ${ga('s5_neighbourhood')===n?'selected':''}>${n}</option>`).join('')}
     </select>
@@ -465,7 +470,7 @@ function renderSection4(){
     <p class="q-label">Did you participate in the Town of Comox OCP update process over the past 18 months?</p>
     <div class="option-grid">${renderRadio('s5_ocp_participated',['Yes — I participated','No — I was aware but chose not to participate','No — I was not aware it was happening'],'s5_ocp_participated')}</div>
     ${state.errors['s5_ocp_participated']?`<p class="error-msg">${state.errors['s5_ocp_participated']}</p>`:''}
-    ${participated===0?`<div class="conditional-block"><p class="q-label">How did you participate? Select all that apply.</p><div class="option-grid">${[['survey','Filled out the Town of Comox online survey'],['openhouse','Attended an open house'],['letter','Wrote a letter or email to council'],['hearing','Attended a public hearing'],['spoke','Spoke at a public hearing'],['other','Other']].map(([val,label])=>`<label class="opt${(ga('s5_ocp_how')||[]).includes(val)?' selected':''}" onclick="ocpHowToggle('${val}',event)"><input type="checkbox" value="${val}" ${(ga('s5_ocp_how')||[]).includes(val)?'checked':''} onclick="event.stopPropagation()"><span class="opt-text">${label}</span></label>`).join('')}</div></div>`:''}
+    ${participated===0?`<div class="conditional-block"><p class="q-label">How did you participate? Select all that apply.</p><div class="option-grid">${[['survey','Filled out the Town of Comox online survey'],['openhouse','Attended an open house'],['letter','Wrote a letter or email to council'],['hearing','Attended a public hearing'],['spoke','Spoke at a public hearing'],['other','Other']].map(([val,label])=>`<label class="opt${(ga('s5_ocp_how')||[]).includes(val)?' selected':''}" onclick="ocpHowToggle('${val}',event)" ontouchend="event.preventDefault();ocpHowToggle('${val}',event)"><input type="checkbox" value="${val}" ${(ga('s5_ocp_how')||[]).includes(val)?'checked':''} onclick="event.stopPropagation()"><span class="opt-text">${label}</span></label>`).join('')}</div></div>`:''}
     ${participated===1?`<div class="conditional-block"><p class="q-label">What was the main reason you didn't participate?</p><div class="option-grid">${renderRadio('s5_ocp_why',['Not enough time','Did not feel my input would make a difference','Did not know enough about the OCP to contribute','Other'],'s5_ocp_why')}</div></div>`:''}
   </div>
   <div class="q-block">
@@ -526,7 +531,7 @@ function renderSection4b(){
   <div class="q-block">
     <p class="q-label">Which of the following do you feel should disqualify a councillor from voting on a matter? Select all that apply.</p>
     <div class="option-grid">
-      ${[['contributions','Receiving campaign contributions from someone directly affected by the decision'],['industry','Working in an industry that benefits from council decisions'],['relationship','Having a personal or business relationship with an applicant or developer'],['none','None of the above — declaring a conflict of interest is sufficient'],['all','All of the above'],['notsure','Not sure']].map(([val,label])=>`<label class="opt${(ga('s5_disqualify')||[]).includes(val)?' selected':''}" onclick="disqualifyToggle('${val}',event)"><input type="checkbox" value="${val}" ${(ga('s5_disqualify')||[]).includes(val)?'checked':''} onclick="event.stopPropagation()"><span class="opt-text">${label}</span></label>`).join('')}
+      ${[['contributions','Receiving campaign contributions from someone directly affected by the decision'],['industry','Working in an industry that benefits from council decisions'],['relationship','Having a personal or business relationship with an applicant or developer'],['none','None of the above — declaring a conflict of interest is sufficient'],['all','All of the above'],['notsure','Not sure']].map(([val,label])=>`<label class="opt${(ga('s5_disqualify')||[]).includes(val)?' selected':''}" onclick="disqualifyToggle('${val}',event)" ontouchend="event.preventDefault();disqualifyToggle('${val}',event)"><input type="checkbox" value="${val}" ${(ga('s5_disqualify')||[]).includes(val)?'checked':''} onclick="event.stopPropagation()"><span class="opt-text">${label}</span></label>`).join('')}
     </div>
   </div>
 `;
@@ -545,7 +550,7 @@ function renderSection5(){
   <div class="q-block">
     <p class="q-label">Select every action you're willing to take before October 17, 2026.</p>
     <div class="option-grid">
-      ${[['vote','I will vote on Saturday, October 17, 2026'],['drive','I will drive or escort someone to vote'],['volunteer','I will volunteer on a campaign'],['forum','I will attend a candidate forum'],['candidates','I will help find or encourage candidates to run'],['share','I will share information with my neighbours'],['run','I would consider running for council myself']].map(([val,label])=>`<label class="opt${checks.includes(val)?' selected':''}" onclick="engageToggle('${val}',event)"><input type="checkbox" value="${val}" ${checks.includes(val)?'checked':''} onclick="event.stopPropagation()"><span class="opt-text">${label}</span></label>`).join('')}
+      ${[['vote','I will vote on Saturday, October 17, 2026'],['drive','I will drive or escort someone to vote'],['volunteer','I will volunteer on a campaign'],['forum','I will attend a candidate forum'],['candidates','I will help find or encourage candidates to run'],['share','I will share information with my neighbours'],['run','I would consider running for council myself']].map(([val,label])=>`<label class="opt${checks.includes(val)?' selected':''}" onclick="engageToggle('${val}',event)" ontouchend="event.preventDefault();engageToggle('${val}',event)"><input type="checkbox" value="${val}" ${checks.includes(val)?'checked':''} onclick="event.stopPropagation()"><span class="opt-text">${label}</span></label>`).join('')}
     </div>
     ${needsSignup()?`<div class="signup-block"><p>You're ready to make a difference — leave your name and email and the comoxvotes.ca team will connect with you about next steps.</p><input type="text" class="input-mb" placeholder="Your name" value="${ga('s6_name')||''}" onchange="sa('s6_name',this.value)"><input type="email" placeholder="Your email" value="${ga('s6_signup_email')||''}" onchange="sa('s6_signup_email',this.value)"></div>`:''}
   </div>
